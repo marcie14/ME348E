@@ -7,7 +7,8 @@ from sendStringScript import sendString
 leftMotor=int(100)
 rightMotor=int(100)
 
-t = time
+oldt = 0
+newt = time.time()
 
 FR=int(1)
 R=int(1)
@@ -89,7 +90,7 @@ if __name__ == '__main__':
         elif (BUMPS == [0,1,1,1,1,1]) or (BUMPS == [0,0,1,1,1,1]) or (BUMPS == [0,0,0,1,1,1]):
             print('left collision')
             sendString('/dev/ttyACM0',115200,'<'+str(-leftMotor)+','+str(-rightMotor)+'>',0.0005)
-            time.sleep(2)
+            
             sendString('/dev/ttyACM0',115200,'<'+str(-leftMotor)+','+str(rightMotor)+'>',0.0005)
             time.sleep(.5)
             sendString('/dev/ttyACM0',115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0005)
@@ -102,24 +103,24 @@ if __name__ == '__main__':
         else:
             print('keep driving')
 
-        #rudimentery state machine
-        if c < 1 and x < 1: ## if either far left/right pressed
-            sendString('/dev/ttyACM0',115200,'<'+str(-leftMotor)+','+str(-rightMotor)+'>',0.0005)
-            time.sleep(2)
-            sendString('/dev/ttyACM0',115200,'<'+str(-leftMotor)+','+str(rightMotor)+'>',0.0005)
-            time.sleep(.5)
-            sendString('/dev/ttyACM0',115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0005)
-            x=1
-            y=1
-            ########################## make unblocked
-                # when time == ..
-        if a < 1 and z < 1: ## if either middle left/right pressed
-           #your code here
-           z=1
-           a=1
-        if b < 1 and y < 1: ## if either left/right pressed
-            #your code here
-            b=1
-            c=1
+        # #rudimentery state machine
+        # if c < 1 and x < 1: ## if either far left/right pressed
+        #     sendString('/dev/ttyACM0',115200,'<'+str(-leftMotor)+','+str(-rightMotor)+'>',0.0005)
+        #     time.sleep(2)
+        #     sendString('/dev/ttyACM0',115200,'<'+str(-leftMotor)+','+str(rightMotor)+'>',0.0005)
+        #     time.sleep(.5)
+        #     sendString('/dev/ttyACM0',115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0005)
+        #     x=1
+        #     y=1
+        #     ########################## make unblocked
+        #         # when time == ..
+        # if a < 1 and z < 1: ## if either middle left/right pressed
+        #    #your code here
+        #    z=1
+        #    a=1
+        # if b < 1 and y < 1: ## if either left/right pressed
+        #     #your code here
+        #     b=1
+        #     c=1
 
 
