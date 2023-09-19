@@ -26,16 +26,19 @@ c = FL
 BUMPS = [1,1,1,1,1,1]
 
 port = '/dev/ttyACM0'
+String2Send = ''
 
 if __name__ == '__main__':
     ser=serial.Serial(port,115200)
     #every time the serial port is opened, the arduino program will restart, very convient!
     ser.reset_input_buffer()
+    ser.reset_output_buffer() #we clear the input and output buffer at the beginning of running any program to make sure
+                             #that any bits left over in the buffer dont show up
     ready = 0
     
 
     while True:
-        
+        ser.write(String2Send.encode('utf-8'))
         #think of the below line as the default condition where no pairs of sensors are triggered as state 0, where the robot moves forward
         sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0005)
         #ser.write(b'<'+bytes(str(leftMotor),'utf-8')+b','+bytes(str(rightMotor),'utf-8')+b'>')
@@ -63,7 +66,8 @@ if __name__ == '__main__':
                 # print(BUMPS) 
                 # print(newt - oldt)
             except:
-                print("packetLost") 
+                a=1
+                # print("packetLost") 
                 #why do I have this exepction? 
 
 
@@ -93,33 +97,32 @@ if __name__ == '__main__':
             oldt = newt
             if BUMPS == [0,0,0,0,0,0]:
                 print('STOP - why all pressed?')
-                # reassign old time and new time
+                String2Send='<0,0>' # go stop / backwards
+                sendString(port,115200,String2Send,0.0005)
 
             elif (BUMPS == [1,1,0,0,1,1]) or (BUMPS == [1,0,0,0,0,1]) or (BUMPS == [0,0,1,1,0,0]) or (BUMPS == [0,1,1,1,1,0]):
                 print('head on collision')
                 # reassign old time and new time
+                String2Send='<150,-150>'#go backwards
+                sendString(port,115200,String2Send,0.0005)
                 
             elif 0 in BUMPS[0:3]:
             # elif (BUMPS == [0,1,1,1,1,1]) or (BUMPS == [1,0,1,1,1,1]) or (BUMPS == [0,0,1,1,1,1]) or (BUMPS == [0,0,0,1,1,1]):
                 print('left collision')
-                sendString(port,115200,'<'+str(-leftMotor)+','+str(-rightMotor)+'>',0.0005)
-                
-                sendString(port,115200,'<'+str(-leftMotor)+','+str(rightMotor)+'>',0.0005)
-                
-                
-                # sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0005)
-                # BUMPS = [1,1,1,1,1,1]
-                # print('231830293579q857093184134751389075')
-                # reassign old time and new time
+                String2Send='<-150,-150>'
+                sendString(port,115200,String2Send,0.0005)
+            
 
             elif 0 in BUMPS[3:6]:
             # elif (BUMPS == [1,1,1,1,1,0]) or (BUMPS == [1,1,1,1,0,0]) or (BUMPS == [1,1,1,0,0,0]):
                 print('right collsion')
-                # reassign old time and new time
+                String2Send='<150,150>'
+                sendString(port,115200,String2Send,0.0005)
 
             else:
                 print('keep driving')
-                # reassign old time and new time
+                String2Send='<-200,200>'
+                sendString(port,115200,String2Send,0.0005)
 
         # reassign old time and new time
         newt = time.time()
