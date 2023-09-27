@@ -92,9 +92,9 @@ void sendDataToRpi() {
    //HEY THIS IS IMPORTANT!!!!!!
    //Read the documentation on the QTR sensors if you want to learn more, but as well as examining where the line is relative to the whole array of sensors, we can also examine what each INDIVIDUAL sensor sees
    //by examining sensorValues at specific places (AFTER the readLineBlack function has been called on it), for example, the below code prints out the outputs from the 0 and 7 sensor seperated by a comma:
-   Serial.print(sensorValues[0]);
-   Serial.print(',');
-   Serial.println(sensorValues[7]);
+//   Serial.print(sensorValues[0]);
+//   Serial.print(',');
+//   Serial.println(sensorValues[7]);
    //these range that can be printed here is 0-1000, 0 means that the INDIVIDUAL sensor is not over a line, and 1000 means it is directly over a line
    //you need to figure out how to use that you can examine the status of each individual sensor to tell the Rpi if 
    //your robot is over a cross. My suggestion is to use an if statement that checks 2 sensors that usually wont both be seeing a line,
@@ -107,10 +107,10 @@ void sendDataToRpi() {
   //
    //HEY THIS IS IMPORTANT!!!!!!
   
-//     Serial.print(leftMotor);
-//     Serial.print(',');
-//     Serial.print(rightMotor);
-//     Serial.print(',');
+  Serial.print(leftMotor);
+  Serial.print(',');
+  Serial.print(rightMotor);
+  Serial.print(',');
   if(isCross == 1){ //this commented out if/else statement is a continuation of the example of logic used to send the rpi the value 8000 both left and right sensors see the line, this is a value that LinePosition will never send, so you can have a catch in the Rpi code that checks if linePosition is greater than 7000
     Serial.println('8000');
     isCross=0;
@@ -125,8 +125,8 @@ void sendDataToRpi() {
 //=======================================
 
 void commandMotors(){
-//analogWrite(3,leftMotor); 
-//analogWrite(2,rightMotor);
+  analogWrite(3,leftMotor); 
+  analogWrite(2,rightMotor);
 //  
 }
 
@@ -154,7 +154,7 @@ void recvWithStartEndMarkers() {
                 }
             }
             else {
-                receivedChars[ndx] = '\0'; // terminates the string, frankly unsure why I need this
+                receivedChars[ndx] = '\0'; // terminates thes string, frankly unsure why I need this
                 recvInProgress = false;
                 ndx = 0;
                 newData = true;
@@ -164,7 +164,7 @@ void recvWithStartEndMarkers() {
         else if (rc == startMarker) {
             recvInProgress = true;
         }
-    }
+    } 
 }
 
 //==================================================================
@@ -183,6 +183,7 @@ void calibrateSensors(){
   for (uint16_t i = 0; i < 200; i++)
   {
     qtr.calibrate();
+    delay(20);
   }
   digitalWrite(LED_BUILTIN, LOW); // turn off Arduino's LED to indicate we are through with calibration
   
