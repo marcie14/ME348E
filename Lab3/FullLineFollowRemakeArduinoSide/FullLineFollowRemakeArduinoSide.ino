@@ -94,7 +94,9 @@ void sendDataToRpi() {
    //by examining sensorValues at specific places (AFTER the readLineBlack function has been called on it), for example, the below code prints out the outputs from the 0 and 7 sensor seperated by a comma:
 //   Serial.print(sensorValues[0]);
 //   Serial.print(',');
-//   Serial.println(sensorValues[7]);
+//   Serial.print(sensorValues[1]);
+//   Serial.print(',');
+//   Serial.println(sensorValues[2]);
    //these range that can be printed here is 0-1000, 0 means that the INDIVIDUAL sensor is not over a line, and 1000 means it is directly over a line
    //you need to figure out how to use that you can examine the status of each individual sensor to tell the Rpi if 
    //your robot is over a cross. My suggestion is to use an if statement that checks 2 sensors that usually wont both be seeing a line,

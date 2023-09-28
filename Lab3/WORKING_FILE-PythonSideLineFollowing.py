@@ -18,13 +18,15 @@ if __name__ == '__main__':
     while True:
         sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0001)
         
+        now = time.time() # constantly reassign new timestamp
+        
         if ser.in_waiting > 0:  #we wait until the arduino has sent something to us before we try to read anything from the serial port.
             #### remove below (debug) ####
 
             leftMotor +=1
             rightMotor +=1
             
-            if leftMotor > 40000 or rightMotor > 40000:
+            if leftMotor > 400 or rightMotor > 400:
                 break
 
             #sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0001)
@@ -33,7 +35,7 @@ if __name__ == '__main__':
 
             line = ser.readline().decode('utf-8')
             line=line.split(',')
-            # print(line)
+            print(line)
             #this splits the incoming string up by commas
             try:
                 
@@ -54,9 +56,8 @@ if __name__ == '__main__':
             #low numbers mean I am too far on the RIGHT, 3500 means I am at the middle
             #below is a basic control law you can send to your motors, with an exeption if z is a value greater than 7000, meaning the arduino code sees that the line sensor is on a cross. Feel free to take insperation from this,
             #but you will need to impliment a state machine similar to what you made in lab 2 (including a way of counting time without blocking)
-            if (now - old) > .0001:
-                old = now
-                now = time.time()
+            if (now - old) > .0001: # check if time stamp differs by interval
+                old = now ## update timestamp for last iteration of this if
                 if z < 400:
                     print('DETECT NO LINE????')
                 elif not z < 7000: #im assuming that in your arduino code you will be setting z to the int 8000 if you sense a cross, dont feel obligated to do it this way.  
