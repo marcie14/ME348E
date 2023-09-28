@@ -12,7 +12,7 @@ boolean newData = false;
 int leftMotor;
 int rightMotor;
 
-Encoder leftwheel(16,17);
+Encoder leftwheel(12,13);
 Encoder rightwheel(14,15);
 long rwPos, lwPos;
 float rPos, lPos;
