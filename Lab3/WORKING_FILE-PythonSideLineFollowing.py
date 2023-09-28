@@ -23,14 +23,14 @@ if __name__ == '__main__':
 
             leftMotor +=1
             rightMotor +=1
-        
-            if leftMotor > 250 or rightMotor > 250:
+            
+            if leftMotor > 40000 or rightMotor > 40000:
                 break
 
-            sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0001)
+            #sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0001)
             #### remove above (debug) ####
 
-            
+
             line = ser.readline().decode('utf-8')
             line=line.split(',')
             # print(line)
