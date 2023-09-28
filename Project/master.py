@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
-import serial
-import time
-import numpy as np
-from sendStringScript import sendString
+
+##### import libraries #####
+import serial       # for communicating with arduino
+import time         # for non-blocking code
+import numpy as np  # for calcs
+from sendStringScript import sendString # for communicating with arduino
+
+##### set up variables #####
+port = '/dev/ttyACM0' # port for communicating to arduino board
+
+now = time.time() # stores time for changing motor actions constantly updates
+old = 0           # stores time since last change in motor actions
+cross_time_new = time.time() # stores time for checking intersections (constantly updates)
+cross_time_old = 0           # stores time from last intersection
+num_intersections = 0        # increments according to number of intersections 
+
 leftMotor=int(100)
 rightMotor=int(100)
-num_intersections = 0
-
-now = time.time()
-old = 0
-cross_time_old = 0
-cross_time_new = time.time()
-port = '/dev/ttyACM0'
 
 
+
+##########
 if __name__ == '__main__':
     ser=serial.Serial(port,115200)
     ser.reset_input_buffer() #clears anything the arduino has been sending while the Rpi isnt prepared to recieve.
