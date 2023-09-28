@@ -50,19 +50,21 @@ if __name__ == '__main__':
             line = ser.readline().decode('utf-8')
                 #ive just called 2 methods from the ser object, what do they do? read the documentation and find out!
             line=line.split(',')
+            print(line)
+            time.sleep(0.3)
                 #this one i wont ask you about this one is pretty self explanitory
 
             try:
-                    
-                FR=int(line[0])
-                R=int(line[1])
-                MR=int(line[2])
+                l=1
+                # FR=int(line[0])
+                # R=int(line[1])
+                # MR=int(line[2])
 
-                ML=int(line[3])  
-                L=int(line[4])
-                FL=int(line[5])
+                # ML=int(line[3])  
+                # L=int(line[4])
+                # FL=int(line[5])
 
-                BUMPS = [FL, L, ML, MR, R, FR]
+                # BUMPS = [FL, L, ML, MR, R, FR]
                 # print(BUMPS) 
                 # print(newt - oldt)
             except:
@@ -120,7 +122,7 @@ if __name__ == '__main__':
                 sendString(port,115200,String2Send,0.0005)
 
             else:
-                print('keep driving')
+                # print('keep driving')
                 String2Send='<-200,200>'
                 sendString(port,115200,String2Send,0.0005)
 

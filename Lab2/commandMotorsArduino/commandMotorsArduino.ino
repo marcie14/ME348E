@@ -1,4 +1,5 @@
 #include <AStar32U4Motors.h>
+#include <Encoder.h>
 
 AStar32U4Motors m; //read the documentation of this library to understand what functions to use to drive the motors and how to use them
 
@@ -11,6 +12,10 @@ boolean newData = false;
 int leftMotor;
 int rightMotor;
 
+Encoder leftwheel(16,17);
+Encoder rightwheel(14,15);
+long rwPos, lwPos;
+float rPos, lPos;
 
   void setup() {
     Serial.begin(115200);
@@ -19,6 +24,11 @@ int rightMotor;
 
 void loop() {
 
+  rwPos = rightwheel.read();
+  rPos = 360 * rwPos / 1440;
+  lwPos = leftwheel.read();
+  lPos = 360 * lwPos / 1440;
+  
   recvWithStartEndMarkers();
 
 
@@ -28,7 +38,7 @@ void loop() {
     commandMotors();
     sendRecievedData();
     newData = false;
-    //why am I setting newdata equil to false after I send data back to the rpi.
+    //why am I setting newdata rwPosequil to false after I send data back to the rpi.
     //what would happen if this line was not here?
     
 }
@@ -100,7 +110,12 @@ void sendRecievedData(){
   
   Serial.print(leftMotor);
   Serial.print(',');
-  Serial.println(rightMotor);
+  Serial.print(rightMotor);
+  Serial.print(',');
+  Serial.print(lPos);
+  Serial.print(',');
+  Serial.println(rPos);
+  
 }
 
 //=======================================
