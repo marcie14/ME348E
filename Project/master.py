@@ -32,16 +32,67 @@ MR=int(1)   # middle right
 ML=int(1)   # middle left
 L=int(1)    # left
 FL=int(1)   # far left
-BUMPS = [0,0,0,0,0,0]   # array of values, will not be 1 if has been pushed
+BUMPS = [-1,-1,-1,-1,-1,-1]   # array of values, will be 0 if has been pushed
 
+    
+def bumpSensors(): 
+    # run until no bumps
+    count = 1
+    if BUMPS == [0,0,0,0,0,0]:
+        print('STOP - why all pressed?')
+        String2Send='<0,0>' # go stop / backwards
+        sendString(port,115200,String2Send,0.0005)
 
-def bumpSensors():
+    elif (BUMPS == [1,1,0,0,1,1]) or (BUMPS == [1,0,0,0,0,1]) or (BUMPS == [0,0,1,1,0,0]) or (BUMPS == [0,1,1,1,1,0]):
+        print('head on collision')
+        # reassign old time and new time
+        String2Send='<150,-150>'#go backwards
+        sendString(port,115200,String2Send,0.0005)
+        
+    elif 0 in BUMPS[0:3]:
+    # elif (BUMPS == [0,1,1,1,1,1]) or (BUMPS == [1,0,1,1,1,1]) or (BUMPS == [0,0,1,1,1,1]) or (BUMPS == [0,0,0,1,1,1]):
+        print('left collision')
+        String2Send='<-150,-150>'
+        sendString(port,115200,String2Send,0.0005)
+    
+
+    elif 0 in BUMPS[3:6]:
+    # elif (BUMPS == [1,1,1,1,1,0]) or (BUMPS == [1,1,1,1,0,0]) or (BUMPS == [1,1,1,0,0,0]):
+        print('right collsion')
+        String2Send='<150,150>'
+        sendString(port,115200,String2Send,0.0005)
+    
+    elif -1 in BUMPS[0:6]:
+        print('not receiving BUMPS')
+
+    else:
+        # print('keep driving')
+        String2Send='<-200,200>'
+        sendString(port,115200,String2Send,0.0005)
+
+    # reassign old time and new time
+    newt = time.time()
     return
 
-def irSensors():
+def irSensors(): 
     return
 
-def lineFollowing():
+def lineFollowing(): #
+    return
+
+def pivot(direction, degrees):
+    if direction == 'left': # counter clockwise
+        leftMotor = 150
+        rightmotor = 150 
+        ######################## need to review how to set motor encoder (rotate 90 degrees)
+    elif direction == 'right': # clockwise
+        leftMotor = -150
+        rightMotor = -150
+    else:
+        print('invalid input')
+    return
+
+def shoot(): # shoot puck
     return
 
 
@@ -90,13 +141,15 @@ if __name__ == '__main__':
                 old = now # update timestamp for last iteration of this if
                 
                 # if bump sensor has been pressed, run bump function.... but is this blocking?
-                if BUMPS != [0,0,0,0,0,0]: 
-                    bumpSensors(BUMPS)
+                if BUMPS != [1,1,1,1,1,1]: 
+                    bumpSensors(BUMPS) # get out of bump situation
                     
                 elif (z != -1):
                     lineFollowing(z)
                     break
                 
+                
+                ###### unedited below ######
                 if z == 0:
                     print('ERROR: DETECT NO LINE????')
                     ### REVISIT THIS SECTION ### will need to prepare for this case. seek line?
