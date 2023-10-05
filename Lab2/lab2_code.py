@@ -28,6 +28,61 @@ BUMPS = [1,1,1,1,1,1]
 port = '/dev/ttyACM0'
 String2Send = ''
 
+def turnRight(initLeftEnc, initRightEnc):
+    leftEncDiff = 0
+    rightEncDiff = 0
+    turn = True
+
+    while turn == True:
+        line = ser.readline().decode('utf-8')
+        line = line.split(',')
+        print(line)
+
+        sendString(port,115200,'<250, -250>',0.0001) #turn right motor command here
+
+        if(len(line) == 3):
+            line = [x.replace("\r\n","") for x in line]
+            leftEncDiff = float(line[0]) - initLeftEnc
+            rightEncDiff = float(line[1]) - initRightEnc
+            time.sleep(0.3)
+        print(leftEncDiff)
+        print(rightEncDiff)
+
+        if(leftEncDiff <= -90 and rightEncDiff <= -90):
+            turn = False
+ 
+    print('it works?')
+
+def turnLeft(initLeftEnc, initRightEnc):
+    leftEncDiff = 0
+    rightEncDiff = 0
+    turn = True
+
+    while turn == True:
+        line = ser.readline().decode('utf-8')
+        line=line.split(',')
+
+        sendString(port,115200,'<250, -250>',0.0001) #turn right motor command here
+
+        if(len(line) == 2):
+            line = [x.replace("\r\n","") for x in line]
+            leftEncDiff = float(line[0]) - initLeftEnc
+            rightEncDiff = float(line[1]) - initRightEnc
+        time.sleep(0.3)
+        print(leftEncDiff)
+        print(rightEncDiff)
+        
+        if(leftEncDiff >= 90 and rightEncDiff >= 90):
+            turn = False
+ 
+    print('it works?')
+
+# line = ser.readline().decode('utf-8')
+#                 #print(line)
+# line=line.split(',')
+# print(line)
+# turnRight(line[0],line[1])   
+
 if __name__ == '__main__':
     ser=serial.Serial(port,115200)
     #every time the serial port is opened, the arduino program will restart, very convient!
@@ -49,9 +104,13 @@ if __name__ == '__main__':
         if ser.in_waiting > 0:
             line = ser.readline().decode('utf-8')
                 #ive just called 2 methods from the ser object, what do they do? read the documentation and find out!
-            line=line.split(',')
             print(line)
+            line=line.split(',')
+            if(line[0] != "" and line[1] != ""):
+                line = [x.replace("\r\n","") for x in line]
+                turnRight(float(line[0]),float(line[1]))
             time.sleep(0.3)
+            print('oops')
                 #this one i wont ask you about this one is pretty self explanitory
 
             try:

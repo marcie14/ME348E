@@ -9,6 +9,54 @@ from sendStringScript import sendString # for communicating with arduino
 ##### set up variables #####
 port = '/dev/ttyACM0' # port for communicating to arduino board
 
+def turnRight(initLeftEnc, initRightEnc):
+    leftEncDiff = 0
+    rightEncDiff = 0
+    turn = True
+
+    while turn == True:
+        line = ser.readline().decode('utf-8')
+        line = line.split(',')
+
+        sendString(port,115200,'<250, -250>',0.0001) #turn right motor command here
+
+        if(len(line) == 2):
+            line = [x.replace("\r\n","") for x in line]
+            leftEncDiff = float(line[0]) - initLeftEnc
+            rightEncDiff = float(line[1]) - initRightEnc
+        time.sleep(0.3)
+        print(leftEncDiff)
+        print(rightEncDiff)
+
+        if(leftEncDiff <= -90 and rightEncDiff <= -90):
+            turn = False
+ 
+    print('it works?')
+
+def turnLeft(initLeftEnc, initRightEnc):
+    leftEncDiff = 0
+    rightEncDiff = 0
+    turn = True
+
+    while turn == True:
+        line = ser.readline().decode('utf-8')
+        line=line.split(',')
+
+        sendString(port,115200,'<250, -250>',0.0001) #turn right motor command here
+
+        if(len(line) == 2):
+            line = [x.replace("\r\n","") for x in line]
+            leftEncDiff = float(line[0]) - initLeftEnc
+            rightEncDiff = float(line[1]) - initRightEnc
+        time.sleep(0.3)
+        print(leftEncDiff)
+        print(rightEncDiff)
+        
+        if(leftEncDiff >= 90 and rightEncDiff >= 90):
+            turn = False
+ 
+    print('it works?')
+
 now = time.time() # stores time for changing motor actions constantly updates
 old = 0           # stores time since last change in motor actions
 cross_time_new = time.time() # stores time for checking intersections (constantly updates)

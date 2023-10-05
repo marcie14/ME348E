@@ -23,11 +23,11 @@ float rPos, lPos;
 }   
 
 void loop() {
-
+// encoders stuff:
   rwPos = rightwheel.read();
-  rPos = 360 * rwPos / 1440;
+  rPos = 360 * rwPos / (2*1440);
   lwPos = leftwheel.read();
-  lPos = 360 * lwPos / 1440;
+  lPos = 360 * lwPos / (2*1440);
   
   recvWithStartEndMarkers();
 
@@ -108,13 +108,14 @@ rightMotor = atoi(strIndexer);
 void sendRecievedData(){
 
   
-  Serial.print(leftMotor);
+//  Serial.print(leftMotor);
+//  Serial.print(',');
+//  Serial.print(rightMotor);
+//  Serial.print(',');
+  Serial.print(lPos); // l encoder
   Serial.print(',');
-  Serial.print(rightMotor);
-  Serial.print(',');
-  Serial.print(lPos);
-  Serial.print(',');
-  Serial.println(rPos);
+  Serial.println(rPos); // r encoder
+ 
   
 }
 

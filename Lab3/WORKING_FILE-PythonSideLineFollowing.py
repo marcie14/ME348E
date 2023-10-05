@@ -12,11 +12,79 @@ old = 0
 cross_time_old = 0
 cross_time_new = time.time()
 port = '/dev/ttyACM0'
+String2Send = ''
+LINE_turn = []
+turn = False
 
+def turnRight(initLeftEnc, initRightEnc):
+    leftEncDiff = 0
+    rightEncDiff = 0
+    turn = True
+
+    while turn == True:
+        line = ser.readline().decode('utf-8')
+        line = line.split(',')
+
+        sendString(port,115200,'<250, -250>',0.0001) #turn right motor command here
+
+        if(len(line) == 2):
+            line = [x.replace("\r\n","") for x in line]
+            leftEncDiff = float(line[0]) - initLeftEnc
+            rightEncDiff = float(line[1]) - initRightEnc
+        time.sleep(0.3)
+        print(leftEncDiff)
+        print(rightEncDiff)
+
+        if(leftEncDiff <= -90 and rightEncDiff <= -90):
+            turn = False
+ 
+    print('it works?')
+
+def turnLeft(initLeftEnc, initRightEnc):
+    leftEncDiff = 0
+    rightEncDiff = 0
+    turn = True
+
+    while turn == True:
+        line = ser.readline().decode('utf-8')
+        line=line.split(',')
+
+        sendString(port,115200,'<250, -250>',0.0001) #turn right motor command here
+
+        if(len(line) == 2):
+            line = [x.replace("\r\n","") for x in line]
+            leftEncDiff = float(line[0]) - initLeftEnc
+            rightEncDiff = float(line[1]) - initRightEnc
+        time.sleep(0.3)
+        print(leftEncDiff)
+        print(rightEncDiff)
+        
+        if(leftEncDiff >= 90 and rightEncDiff >= 90):
+            turn = False
+ 
+    print('it works?')
 
 if __name__ == '__main__':
     ser=serial.Serial(port,115200)
-    ser.reset_input_buffer() #clears anything the arduino has been sending while the Rpi isnt prepared to recieve.
+    #every time the serial port is opened, the arduino program will restart, very convient!
+    ser.reset_input_buffer()
+    ser.reset_output_buffer() #we clear the input and output buffer at the beginning of running any program to make sure
+                             #that any bits left over in the buffer dont show up
+    ready = 0
+    while True:
+        ser.write(String2Send.encode('utf-8'))
+        sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0005)
+
+        if ser.in_waiting > 0:
+            line = ser.readline().decode('utf-8')
+                        #ive just called 2 methods from the ser object, what do they do? read the documentation and find out!
+            print(line)
+            line=line.split(',')
+            if(len(line) == 2 and line[0] != "" and line[1] != ""):
+                line = [x.replace("\r\n","") for x in line]
+                turnRight(float(line[0]),float(line[1]))
+            time.sleep(0.3)
+                
 
     while True:
         sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0001)
@@ -99,7 +167,7 @@ if __name__ == '__main__':
                         
                 elif z < 1500:
                     print('DETECT RIGHT, MOVING LEFT')
-                    ## move left (not pivot in place)
+                    ## movin_waitinge left (not pivot in place)
                     leftMotor = 100 + 0.02 * z  
                     rightMotor = 250 - 0.02 * z
                                         
@@ -115,7 +183,26 @@ if __name__ == '__main__':
                     leftMotor = 250
                     rightMotor = 250
                     
-                        
+# def turnRight(initLeftEnc, initRightEnc):
+#     leftEncDiff = 0
+#     rightEncDiff = 0
+#     print('am i in?')
+#     while leftEncDiff < 90 and rightEncDiff < 90:
+#         print('im in')
+#         if ser.in_waiting > 0:
+#                 line = ser.readline().decode('utf-8')
+#                 #print(line)
+#                 line=line.split(',')
+#                 leftEncDiff = line[0] - initLeftEnc
+#                 rightEncDiff = line[1] - initRightEnc
+#                 time.sleep(0.3)
+#                 print('hahahahahahha')
+
+# line = ser.readline().decode('utf-8')
+#                 #print(line)
+# line=line.split(',')
+# print(line)
+# turnRight(line[0],line[1])   
                     
                         
                     
