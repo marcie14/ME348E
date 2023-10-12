@@ -9,26 +9,26 @@ from gpiozero import RotaryEncoder
 #assign parameter values
 ppr = 48 #pulse per rev for encoder 
 tsample = 0.02 # sampling period for encoder reading
-tdisp = 0.5 # freqency to show encoder reading on terminal
+tdisp = 0.05 # freqency to show encoder reading on terminal
 tstop = 20
 
 ### idk what this is below
-K = 0.2
-deltaEffort = 1
+# K = 0.2
+# deltaEffort = 1
 
-T = 0
-d = 0
-Gp = K / deltaEffort
+# T = 0
+# d = 0
+# Gp = K / deltaEffort
 
-Kp = 1.2 * T / (d * Gp)
-Ki = 0.5 / d
-Kd = 0.5 * d
+# Kp = 1.2 * T / (d * Gp)
+# Ki = 0.5 / d
+# Kd = 0.5 * d
 
-error = 1
-cumError = error
-rateError = cumError
+# error = 1
+# cumError = error
+# rateError = cumError
 
-out = Kp*error + Ki*cumError + Kd*rateError
+# out = Kp*error + Ki*cumError + Kd*rateError
 
 #idk what this is above
 
