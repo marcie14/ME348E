@@ -71,19 +71,19 @@ if __name__ == '__main__':
     ser.reset_output_buffer() #we clear the input and output buffer at the beginning of running any program to make sure
                              #that any bits left over in the buffer dont show up
     ready = 0
-    while True:
-        ser.write(String2Send.encode('utf-8'))
-        sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0005)
+    # while True:
+    #     ser.write(String2Send.encode('utf-8'))
+    #     sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0005)
 
-        if ser.in_waiting > 0:
-            line = ser.readline().decode('utf-8')
-                        #ive just called 2 methods from the ser object, what do they do? read the documentation and find out!
-            print(line)
-            line=line.split(',')
-            if(len(line) == 2 and line[0] != "" and line[1] != ""):
-                line = [x.replace("\r\n","") for x in line]
-                turnRight(float(line[0]),float(line[1]))
-            time.sleep(0.3)
+    #     if ser.in_waiting > 0:
+    #         line = ser.readline().decode('utf-8')
+    #                     #ive just called 2 methods from the ser object, what do they do? read the documentation and find out!
+    #         print(line)
+    #         line=line.split(',')
+    #         # if(len(line) == 2 and line[0] != "" and line[1] != ""):
+    #         #     line = [x.replace("\r\n","") for x in line]
+    #         #     turnRight(float(line[0]),float(line[1]))
+    #         # time.sleep(0.3)
                 
 
     while True:
@@ -94,11 +94,11 @@ if __name__ == '__main__':
         if ser.in_waiting > 0:  #we wait until the arduino has sent something to us before we try to read anything from the serial port.
             #### remove below (debug) ####
 
-            leftMotor +=1
-            rightMotor +=1
+            # leftMotor +=1
+            # rightMotor +=1
             
-            if leftMotor > 400 or rightMotor > 400:
-                break
+            # if leftMotor > 400 or rightMotor > 400:
+            #     break
 
             #sendString(port,115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0001)
             #### remove above (debug) ####
@@ -119,7 +119,7 @@ if __name__ == '__main__':
             except:
                 print("packet dropped") #this is designed to catch when python shoves bits on top of each other. 
 
-
+            time.sleep(0.3)
         
         
             #Following is my control law, we're keeping it basic for now, writing good control law is your job
@@ -133,7 +133,7 @@ if __name__ == '__main__':
                     print('ERROR: DETECT NO LINE????')
                     ### REVISIT THIS SECTION ### will need to prepare for this case. seek line?
                     
-                elif not z < 7000: #im assuming that in your arduino code you will be setting z to the int 8000 if you sense a cross, dont feel obligated to do it this way.  
+                elif  z > 7000: #im assuming that in your arduino code you will be setting z to the int 8000 if you sense a cross, dont feel obligated to do it this way.  
                     # now that we are SURE that z isnt the string cross, we cast z to an int and recalculate leftMotor and rightMotor, 
                     ## move left (not pivot in place)
                     # do something here like incrimenting a value you call 'lines_hit' to one higher, and writing code to make sure that some time (1 second should do it) 

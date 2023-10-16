@@ -103,7 +103,7 @@ void sendDataToRpi() {
    //then change the value of lineposition to be the string 'cross'
   //example logic to detect if your linesensor is over a cross:
   //
-  if(sensorValues[7] > 750 && sensorValues[0] >750){ //meaning both the far left and right sensors see a value above 750, meaning your robot is VERY LIKLY over a cross
+  if(sensorValues[7] >750 && sensorValues[6] >750 && sensorValues[1] >750 && sensorValues[0] >750){ //meaning both the far left and right sensors see a value above 750, meaning your robot is VERY LIKLY over a cross
     isCross=1; //now I will be sending the string 'cross' to the rpi INSTEAD of a number between 0-7000 that rearesents the line sensor array's position relative to the cross
   }
   //

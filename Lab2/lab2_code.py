@@ -106,11 +106,13 @@ if __name__ == '__main__':
                 #ive just called 2 methods from the ser object, what do they do? read the documentation and find out!
             print(line)
             line=line.split(',')
-            if(line[0] != "" and line[1] != ""):
-                line = [x.replace("\r\n","") for x in line]
-                turnRight(float(line[0]),float(line[1]))
-            time.sleep(0.3)
-            print('oops')
+        
+
+            # if(line[0] != "" and line[1] != ""):
+            #     line = [x.replace("\r\n","") for x in line]
+            #     turnRight(float(line[0]),float(line[1]))
+            # time.sleep(0.3)
+            # print('oops')
                 #this one i wont ask you about this one is pretty self explanitory
 
             try:
