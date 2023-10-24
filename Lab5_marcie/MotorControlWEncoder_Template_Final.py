@@ -5,28 +5,29 @@ import numpy as np
 import RPi.GPIO as GPIO
 from simple_pid import PID
 from gpiozero import RotaryEncoder
-# import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 # import pandas as pd
 
 #assign parameter values
 ppr = 48 #pulse per rev for encoder 
 tsample = 0.01 # sampling period for encoder reading
-tdisp = 0.025 # freqency to show encoder reading on terminal
-tstop = 10
+tdisp = 0.01 # freqency to show encoder reading on terminal
+tstop = 6
 
 ### idk what this is below
 K = 0.2
 
 
-T = 0.11
+T = 0.19
 d = 0.05
 k = 20
 
 Gp = 2
 
-kp = 1.2 * T / (d * Gp)
-ki = 0.5 / d
-kd = 0.5 * d
+#values for motor with without writing on it
+kp = 3
+ki = 50
+kd = 0.005 
 setPoint = 20
 
 # pid = PID(Kp, Ki, Kd, setPoint)
@@ -84,9 +85,12 @@ while tcurr <= tstop:
 		error = setPoint-velCurr
 		cumError += error*(tdisp)
 		rateError = (error-lastSpeedError)/tdisp
-		out = kp*error + ki*cumError + kd*rateError
+		out = abs(kp*error + ki*cumError + kd*rateError)
+		if(out > 100):
+			out = 100
 		p.start(out)
-		print(velCurr , out, tcurr)
+		# print(velCurr , out, tcurr)
+		print(velCurr, tcurr)
 		ts.append(tcurr)
 		revs.append(velCurr)
 
