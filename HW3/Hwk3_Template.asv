@@ -107,15 +107,15 @@ for i = 2:length(tcompound)
         xComp(i) = xComp(i-1) + v*sin(theta(i-1))*dt;
         yComp(i) = yComp(i-1) + v*cos(theta(i-1))*dt;
         theta(i)=theta(i-1);
-    elseif (yComp(i)==42 && theta(i) < 3.14)
-        xComp(i) = xComp(i-1);
-        yComp(i) = yComp(i-1);
-        theta(i) = theta(i-1) + 2*vr*dt/l;
-    elseif xComp(i)<21 && theta(i)==pi
+    elseif (theta==pi && xComp<21)
         xComp(i) = xComp(i-1) + v*sin(theta(i-1))*dt;
         yComp(i) = yComp(i-1) + v*cos(theta(i-1))*dt;
         theta(i)=theta(i-1);
-    elseif (xComp(i)==21 && theta(i)>0)
+    elseif (yComp==42 && theta < pi)
+        xComp(i) = xComp(i-1);
+        yComp(i) = yComp(i-1);
+        theta(i) = theta(i-1) + 2*vr*dt/l;
+    elseif (xComp==21 && theta>0)
         xComp(i) = xComp(i-1);
         yComp(i) = yComp(i-1);
         theta(i) = theta(i-1) + 2*vl*dt/l;
