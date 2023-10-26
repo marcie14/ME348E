@@ -19,10 +19,10 @@ boolean newData = true;
 
 // Pin set up + library initializations
 // Ultrasonic
-const byte x_trig_pin = 10;
-const byte x_echo_pin = 11;
-const byte y_trig_pin = 12; 
-const byte y_echo_pin = 13; 
+const byte x_trig_pin = 5;
+const byte y_trig_pin = 7;
+const byte x_echo_pin = 6;
+const byte y_echo_pin = 8; 
 UltraSonicDistanceSensor X_sensor(x_trig_pin, x_echo_pin);
 UltraSonicDistanceSensor Y_sensor(y_trig_pin, y_echo_pin);
 
@@ -38,6 +38,7 @@ const byte LW_Pin2 = 15;
 
 
 void setup() {
+menu://applications/Development/arduino.desktop
 
    Serial.begin(115200);
 
