@@ -110,7 +110,7 @@ while tcurr <= tstop:
 	## marcie comment above
 
 
-plt.plot(ts, revs)
+# plt.plot(ts, revs)
 
 	
 print('Done.')
