@@ -1,7 +1,7 @@
-// #include <AStar32U4Motors.h>
-// #include <Encoder.h>
+ #include <AStar32U4Motors.h>
+ #include <Encoder.h>
 #include <HCSR04.h>
-// AStar32U4Motors m; //read the documentation of this library to understand what functions to use to drive the motors and how to use them
+ AStar32U4Motors m; //read the documentation of this library to understand what functions to use to drive the motors and how to use them
 
 
 const byte numChars = 32;
@@ -31,8 +31,8 @@ const byte RW_Pin1 = 2;
 const byte RW_Pin2 = 3; 
 const byte LW_Pin1 = 14; 
 const byte LW_Pin2 = 15;
-// Encoder rightwheel(RW_Pin1,RW_Pin2);
-// Encoder leftwheel(LW_Pin1,LW_Pin2);
+ Encoder rightwheel(RW_Pin1,RW_Pin2);
+ Encoder leftwheel(LW_Pin1,LW_Pin2);
 
 // IR sensors
 
@@ -49,11 +49,11 @@ menu://applications/Development/arduino.desktop
 
 void loop() {
 
-  // read drive motor encorder
-  // rwPos = rightwheel.read();
-  // rPos = 360 * rwPos / 1440;
-  // lwPos = leftwheel.read();
-  // lPos = 360 * lwPos / 1440;
+  // read drive motor encoder
+   rwPos = rightwheel.read();
+   rPos = 360 * rwPos / 1440;
+   lwPos = leftwheel.read();
+   lPos = 360 * lwPos / 1440;
 
   // read ultrasonic sensors
   x_dist = X_sensor.measureDistanceCm();
@@ -138,15 +138,15 @@ rightMotor = atoi(strIndexer);
 void sendRecievedData(){
   
   // print current location
-  Serial.print(x_dist);
-  Serial.print(',');
-  Serial.print(y_dist);
-  // // print motor encoder values
-  // Serial.print(',');
-  // Serial.print(lPos); // l encoder
-  // Serial.print(',');
-  // Serial.println(rPos); // r encoder
-  // print IR beacon values
+   Serial.print(x_dist);
+   Serial.print(',');
+   Serial.print(y_dist);
+   // print motor encoder values
+   Serial.print(',');
+   Serial.print(lPos); // l encoder
+   Serial.print(',');
+   Serial.println(rPos); // r encoder
+  // print IR beacon values                    
   // Serial.print(',');
   // Serial.print(L_IR); // left IR sensor
   // Serial.print(',');
@@ -163,15 +163,15 @@ void commandMotors(){ // drive motors
 
   //read the documentation for the functions that drive the motors in the astar library
 
-  // m.setM1Speed(leftMotor);
-  // m.setM2Speed(rightMotor);
+   m.setM1Speed(leftMotor);
+   m.setM2Speed(rightMotor);
   //uncomment to drive motors
 }
 
 //=======================================
 
 
-// function for ir sensors
+// function for ir sensorsrft
 
 // function for stepper motors for feeder (PI?)
 
