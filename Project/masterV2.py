@@ -100,5 +100,5 @@ if __name__ == '__main__':
                 else: ## [0,0,0] or [1,0,1]
                     print('no ir detected...')
                     # ERROR or game over
-                
+            
            

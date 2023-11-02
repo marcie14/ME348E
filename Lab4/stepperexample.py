@@ -8,6 +8,7 @@ import sys
 
 #assign GPIO pins for motor
 motor_channel = (13,16,19,20)
+speed = 0.001
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(motor_channel,GPIO.OUT)
@@ -16,85 +17,85 @@ GPIO.setup(motor_channel,GPIO.OUT)
 async def StepperFull():
 	print('clockwise\n')
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.LOW,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.HIGH,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.HIGH,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.LOW,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 
 
 async def CounterStepperFull():
 	print('counter clockwise\n')
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.LOW,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.HIGH,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.HIGH,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.LOW,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 
 async def HighStepperFull():
 	print('counter clockwise\n')
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.LOW,GPIO.LOW,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.HIGH,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.HIGH,GPIO.HIGH,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.HIGH,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 
 async def HighCounterStepperFull():
 	print('counter clockwise\n')
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.LOW,GPIO.LOW,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.HIGH,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.HIGH,GPIO.HIGH,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.HIGH,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 
 async def StepperHalf():
 	print('counter clockwise\n')
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.LOW,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.HIGH,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.HIGH,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.HIGH,GPIO.HIGH,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.HIGH,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.HIGH,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.LOW,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.LOW,GPIO.LOW,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 
 async def CounterStepperHalf():
 	print('counter clockwise\n')
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.LOW,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.HIGH,GPIO.HIGH))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.LOW,GPIO.HIGH,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.HIGH,GPIO.HIGH,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.LOW,GPIO.HIGH,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.HIGH,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.LOW,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 	GPIO.output(motor_channel, (GPIO.HIGH,GPIO.LOW,GPIO.LOW,GPIO.LOW))
-	await asyncio.sleep(0.002)
+	await asyncio.sleep(speed)
 
 
 
@@ -110,23 +111,24 @@ async def main():
 	while True:
 		try:
 			if(motor_direction == 'cw'):
-                                if(motor_stepping == 'f'):
-                                        await StepperFull()
-                                elif(motor_stepping == 'ht'):
-                                        await HighStepperFull()
-                                elif(motor_stepping == 'ha'):
-                                        await StepperHalf()
+				if(motor_stepping == 'f'):
+						await StepperFull()
+				elif(motor_stepping == 'ht'):
+						await HighStepperFull()
+				elif(motor_stepping == 'ha'):
+						await StepperHalf()
 			elif(motor_direction == 'ccw'):
-                                if(motor_stepping == 'f'):
-                                        await CounterStepperFull()
-                                elif(motor_stepping == 'ht'):
-                                        await HighCounterStepperFull()
-                                elif(motor_stepping == 'ha'):
-                                        await CounterStepperHalf()
+				if(motor_stepping == 'f'):
+						await CounterStepperFull()
+				elif(motor_stepping == 'ht'):
+						await HighCounterStepperFull()
+				elif(motor_stepping == 'ha'):
+						await CounterStepperHalf()
 
 		except KeyboardInterrupt as e: # have to put ctrl+c for this to stop
-			motor_direction = input('Select motor direction: c=clockwise or q to quit\n') # you add counterclockwise option
+			motor_direction = input('Select motor direction: cw=clockwise or q to quit\n') # you add counterclockwise option
 			if(motor_direction == 'q'):
 				print('Motor Stopped')
+
 
 asyncio.run(main())
