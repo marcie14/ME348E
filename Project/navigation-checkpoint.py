@@ -8,11 +8,12 @@ from sendStringScript import sendString # for communicating with arduino
 import RPi.GPIO as GPIO # for IR sensor
 
 ##### set up variables #####
-port = '/dev/ttyACM0' # RPi port for communicating to arduino board
+port = '/dev/ttyACMO' # RPi port for communicating to arduino board
 # port = '/dev/cu.usbmodem2101' # marcie mac port
 
 now = time.time() # stores time for changing motor actions constantly updates
 old = 0           # stores time since last change in motor actions
+interval = 0.05
 
 # set initial values
 x_dist = -1 # distance x sensor detects from wall
@@ -27,9 +28,9 @@ R_Motor = 100
 motors = (L_Motor, R_Motor) # motor tuple
 
 # IR sensors
-L_IR_pin = 17
-M_IR_pin = 18
-R_IR_pin = 27
+L_IR_pin = 4
+M_IR_pin = 17
+R_IR_pin = 18
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(L_IR_pin,GPIO.IN)
 GPIO.setup(M_IR_pin,GPIO.IN)
@@ -48,6 +49,7 @@ MODE = 0 # for determining setup vs game mode
 G1 = (38, 30) # cm - NOT ADJUSTED FOR CHASSIS
 G2 = (91, 30) # cm - NOT ADJUSTED FOR CHASSIS
 G3 = (57, 30) # cm - NOT ADJUSTED FOR CHASSIS
+position_tolerance = 3 # cm 
 
 def get_dir(x, y):
     dir = 1
@@ -66,37 +68,43 @@ if __name__ == '__main__':
         # L_Motor, R_Motor, Feeder, Shooter
         now = time.time() # constantly reassign new timestamp
         ser.write(String2Send.encode('utf-8'))
-        sendString(port,115200,'<250, -250>',0.0001) #turn right motor command here
+        sendString(port,115200,String2Send,0.0001) #turn right motor command here
         
         if ser.in_waiting > 0:  #we wait until the arduino has sent something to us before we try to read anything from the serial port.
             print('in if ser waiting')
-            line = ser.readline().decode('utf-8') # read incoming string
-            # print(line) # debug
+            if abs(old-now) >= interval:
+                old = now
+                print('in interval')
+                line = ser.readline().decode('utf-8') # read incoming string
+                # print(line) # debug
 
-            line=line.split(',') # split incoming string into list with comma delimeter
-            print(line) # debug
+                line=line.split(',') # split incoming string into list with comma delimeter
+                print(line) # debug
 
-            try:
-                print('in try')
-                x_dist = float(line[0]) # distance x sensor detects from wall
-                y_dist = float(line[1]) # distance y sensor detects from wall
-                # L_Motor = int(line[2]) # left motor speed
-                # M_Motor = int(line[3]) # right motor speed
+                try:
+                    print('in try')
+                    x_dist = float(line[0]) # distance x sensor detects from wall
+                    y_dist = float(line[1]) # distance y sensor detects from wall
+                    L_Motor = int(line[2]) # left motor speed
+                    R_Motor = int(line[3]) # right motor speed
 
-                # L_IR = GPIO.input(L_IR_pin) # left IR sensor reading
-                # M_IR = GPIO.input(M_IR_pin) # middle IR sensor reading
-                # R_IR = GPIO.input(R_IR_pin) # right IR sensor reading
+                    # L_IR = GPIO.input(L_IR_pin) # left IR sensor reading
+                    # M_IR = GPIO.input(M_IR_pin) # middle IR sensor reading
+                    # R_IR = GPIO.input(R_IR_pin) # right IR sensor reading
 
-                # motors = (L_Motor, R_Motor) # motor tuple
-                # IR = [L_IR, M_IR, R_IR] # IR list - NOT DETECTED == [1,1,1]
+                    motors = (L_Motor, R_Motor) # motor tuple
+                    IR = [L_IR, M_IR, R_IR] # IR list - NOT DETECTED == [1,1,1]
 
-                print(x_dist, y_dist)
-                # direction = get_dir(x_dist, y_dist)
-            except:
-                print("packet dropped") # this is designed to catch when python shoves bits on top of each other. 
-                GPIO.cleanup()
+                    print('Position: ',x_dist, y_dist)
+                    print('Motor Values: ', motors)
+                    print('IR Values: ', IR, '\n\n')
+                    # direction = get_dir(x_dist, y_dist)
+                except:
+                    print("packet dropped") # this is designed to catch when python shoves bits on top of each other. 
+                    GPIO.cleanup()
+                    # break
 
-            if MODE == 0:
+            if MODE == 0:                          
                 # rotate 360 deg to orient system
                 # set dir = front sensor detects front wall, left to left
                 # move forward to G2 = (x,y)

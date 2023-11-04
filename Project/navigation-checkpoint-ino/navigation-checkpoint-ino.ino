@@ -31,8 +31,8 @@ const byte RW_Pin1 = 2;
 const byte RW_Pin2 = 3; 
 const byte LW_Pin1 = 14; 
 const byte LW_Pin2 = 15;
- Encoder rightwheel(RW_Pin1,RW_Pin2);
- Encoder leftwheel(LW_Pin1,LW_Pin2);
+Encoder rightwheel(RW_Pin1,RW_Pin2);
+Encoder leftwheel(LW_Pin1,LW_Pin2);
 
 // IR sensors
 
@@ -61,17 +61,18 @@ void loop() {
   
   recvWithStartEndMarkers();
 
-
-  if (newData == true){
-        
-    parseData();
-    commandMotors();
-    sendRecievedData();
-    newData = false;
-    //why am I setting newdata rwPosequil to false after I send data back to the rpi.
-    //what would happen if this line was not here?
-    
-    }
+  Serial.println("setting motors");
+  commandMotors();
+//  if (newData == true){
+//        
+//    parseData();
+//    commandMotors();
+//    sendRecievedData();
+//    newData = false;
+//    //why am I setting newdata rwPosequil to false after I send data back to the rpi.
+//    //what would happen if this line was not here?
+//    
+//    }
 }
 
 
@@ -143,16 +144,14 @@ void sendRecievedData(){
    Serial.print(y_dist);
    // print motor encoder values
    Serial.print(',');
-   Serial.print(lPos); // l encoder
+   Serial.print(leftMotor);
    Serial.print(',');
-   Serial.println(rPos); // r encoder
-  // print IR beacon values                    
-  // Serial.print(',');
-  // Serial.print(L_IR); // left IR sensor
-  // Serial.print(',');
-  // Serial.print(M_IR); // middle IR sensor
-  // Serial.print(',');
-  // Serial.println(R_IR); // right IR sensor 
+   Serial.println(rightMotor);
+//  Serial.print(',');
+//   Serial.print(',');
+//   Serial.print(lPos); // l encoder
+//   Serial.print(',');
+//   Serial.println(rPos); // r encoder
 
 }
 
