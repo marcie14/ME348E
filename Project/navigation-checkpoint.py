@@ -9,7 +9,7 @@ from sendStringScript import sendString # for communicating with arduino
 
 ##### set up variables #####
 # port = '/dev/ttyACMO' # RPi port for communicating to arduino board
-port = '/dev/cu.usbmodem1101' # marcie mac port
+port = '/dev/cu.usbmodem101' # marcie mac port
 
 now = time.time() # stores time for changing motor actions constantly updates
 old = 0           # stores time since last change in motor actions
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     ser.reset_output_buffer()
     print('inif')
     while True:
-        # sendString(port,115200,'<'+str(driveAction)+','+str(shootAction)+ ',' + str(feedAction)+'>',0.0001)
+        sendString(port,115200,'<'+str(driveAction)+','+str(shootAction)+ ',' + str(feedAction)+'>',0.0001)
         # L_Motor, R_Motor, Feeder, Shooter
         now = time.time() # constantly reassign new timestamp
         ser.write(String2Send.encode('utf-8'))

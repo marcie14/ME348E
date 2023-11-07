@@ -53,60 +53,58 @@ void loop() {
   x_dist = X_sensor.measureDistanceCm();
   y_dist = Y_sensor.measureDistanceCm();
   
-  // Serial.print(x_dist);
-  // Serial.print(',');
-  // Serial.println(y_dist);
-
-
-
-  // if (x_dist > 30) {
-  //   turnRight();
-  // }
-  // if (x_dist == 30){
-  //   stopMoving();
-  //   delay(5000);
-  // }
-  // if (x_dist < 30){
-  //   turnLeft();
-  // }
-  // x_dist = x_dist - 1;
-  // delay (500);
+  if (y_dist < 5) {
+    Serial.println("stop moving");
+    stopMoving();
+  }
+  else if (x_dist < 5){
+    Serial.println("turnRight");
+    turnRight();
+  }
+  else{
+    Serial.println("moveStraight");
+    moveStraight();
+  }
+  
+  
   recvWithStartEndMarkers();
+  sendRecievedData();
+
 
  if (newData == true){
        
   parseData();
-  switch (driveAction) {
-    case 0: // stopMoving
-      stopMoving();
-    case 1: // moveStraight
-      moveStraight();
-    case 2: // turn Right
-      turnRight();
-    case 3: // turn Left
-      turnLeft();
-    case 4: // move Backwards
-      moveBackwards();
-    default: // error
-      break;
-  }
-  switch (shootAction) {
-    case 0: // prime + pause
-      shootAction = 0; /////////FIX
-    case 1: // shoot
-      break; /////////FIX
-    default: // error
-      break;
-  }
-  switch (feedAction) {
-    case 0: // prime + pause
-      feedAction = 0; /////////FIX
-    case 1: // drop puck
-      break; /////////FIX
-    default: // error
-      break;
-  }
-  sendRecievedData();
+  // switch (driveAction) {
+  //   case 0: // stopMoving
+  //     stopMoving();
+  //   case 1: // moveStraight
+  //     moveStraight();
+  //   case 2: // turn Right
+  //     turnRight();
+  //   case 3: // turn Left
+  //     turnLeft();
+  //   case 4: // move Backwards
+  //     moveBackwards();
+  //   default: // error
+  //     moveStraight();
+
+  // }
+  // switch (shootAction) {
+  //   case 0: // prime + pause
+  //     shootAction = 0; /////////FIX
+  //   case 1: // shoot
+  //     shootAction = 0;
+  //   default: // error
+  //     shootAction = 0;
+  // }
+  // switch (feedAction) {
+  //   case 0: // prime + pause
+  //     feedAction = 0; /////////FIX
+  //   case 1: // drop puck
+  //     feedAction = 0;
+  //   default: // error
+  //     feedAction = 0;
+  // }
   newData = false;
   }
 }
@@ -156,7 +154,6 @@ void parseData(){
   shootAction = atoi(strIndexer);
   strIndexer = strtok(NULL,",");
   feedAction = atoi(strIndexer);
-
 
 }
 
