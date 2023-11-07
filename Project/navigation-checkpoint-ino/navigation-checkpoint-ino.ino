@@ -1,91 +1,120 @@
- #include <AStar32U4Motors.h>
- #include <Encoder.h>
 #include <HCSR04.h>
- AStar32U4Motors m; //read the documentation of this library to understand what functions to use to drive the motors and how to use them
-
-
-const byte numChars = 32;
-char receivedChars[numChars];
-char tempChar[numChars]; // temporary array used for parsing
-int leftMotor;
-int rightMotor;
-long rwPos, lwPos;
-float rPos, lPos;
-float x_dist, y_dist; // for ultrastonic
-float L_IR, M_IR, R_IR; // for IR
 
 boolean newData = true;
 
+// data parsing
+const byte numChars = 32;
+char receivedChars[numChars];
+char tempChar[numChars]; // temporary array used for parsing
 
 // Pin set up + library initializations
 // Ultrasonic
-const byte x_trig_pin = 5;
-const byte y_trig_pin = 7;
-const byte x_echo_pin = 6;
-const byte y_echo_pin = 8; 
+const byte x_trig_pin = 22;
+const byte x_echo_pin = 24;
+const byte y_trig_pin = 26;
+const byte y_echo_pin = 28; 
 UltraSonicDistanceSensor X_sensor(x_trig_pin, x_echo_pin);
 UltraSonicDistanceSensor Y_sensor(y_trig_pin, y_echo_pin);
 
-// Drive Motors
-const byte RW_Pin1 = 2; 
-const byte RW_Pin2 = 3; 
-const byte LW_Pin1 = 14; 
-const byte LW_Pin2 = 15;
-Encoder rightwheel(RW_Pin1,RW_Pin2);
-Encoder leftwheel(LW_Pin1,LW_Pin2);
+// drive motors
+int motor1pin1 = 2;
+int motor1pin2 = 3;
+int motor2pin1 = 4;
+int motor2pin2 = 5;
 
-// IR sensors
+// variable initializations
+int driveAction;
+int shootAction;
+int feedAction;
+float x_dist; // ultrasonic
+float y_dist; // ultrasonic
+int leftMotor; // drive motor speed
+int rightMotor; // drive motor speed
 
 
 void setup() {
 menu://applications/Development/arduino.desktop
+  // put your setup code here, to run once:
+  pinMode(motor1pin1, OUTPUT);
+  pinMode(motor1pin2, OUTPUT);
+  pinMode(motor2pin1, OUTPUT);
+  pinMode(motor2pin2, OUTPUT);
 
-   Serial.begin(115200);
+  pinMode(9,   OUTPUT); 
+  pinMode(10, OUTPUT);
 
-   Serial.println("<Arduino is ready>");
+  Serial.begin(115200);
+  Serial.println("<Arduino is ready>");
 
- 
 }   
 
 void loop() {
 
-  // read drive motor encoder
-   rwPos = rightwheel.read();
-   rPos = 360 * rwPos / 1440;
-   lwPos = leftwheel.read();
-   lPos = 360 * lwPos / 1440;
-
-  // read ultrasonic sensors
   x_dist = X_sensor.measureDistanceCm();
   y_dist = Y_sensor.measureDistanceCm();
   
+  // Serial.print(x_dist);
+  // Serial.print(',');
+  // Serial.println(y_dist);
+
+
+
+  // if (x_dist > 30) {
+  //   turnRight();
+  // }
+  // if (x_dist == 30){
+  //   stopMoving();
+  //   delay(5000);
+  // }
+  // if (x_dist < 30){
+  //   turnLeft();
+  // }
+  // x_dist = x_dist - 1;
+  // delay (500);
   recvWithStartEndMarkers();
 
-  Serial.println("setting motors");
-  commandMotors();
-//  if (newData == true){
-//        
-//    parseData();
-//    commandMotors();
-//    sendRecievedData();
-//    newData = false;
-//    //why am I setting newdata rwPosequil to false after I send data back to the rpi.
-//    //what would happen if this line was not here?
-//    
-//    }
+ if (newData == true){
+       
+  parseData();
+  switch (driveAction) {
+    case 0: // stopMoving
+      stopMoving();
+    case 1: // moveStraight
+      moveStraight();
+    case 2: // turn Right
+      turnRight();
+    case 3: // turn Left
+      turnLeft();
+    case 4: // move Backwards
+      moveBackwards();
+    default: // error
+      break;
+  }
+  switch (shootAction) {
+    case 0: // prime + pause
+      shootAction = 0; /////////FIX
+    case 1: // shoot
+      break; /////////FIX
+    default: // error
+      break;
+  }
+  switch (feedAction) {
+    case 0: // prime + pause
+      feedAction = 0; /////////FIX
+    case 1: // drop puck
+      break; /////////FIX
+    default: // error
+      break;
+  }
+  sendRecievedData();
+  newData = false;
+  }
 }
 
-
+//====================================
 void recvWithStartEndMarkers() {
-//this function is the most important one of the whole lab, read the blog post made my Robin2
-//some questions:
-      //whats the purpose of the start and end markers?
-      //Why bother making this code unblocking?
-      //why not use the Arduino built in functions for reading serial data?
       
     static boolean recvInProgress = false;
-    //what is the purpose of this boolean?
-    
     static byte ndx = 0;
     char startMarker = '<';
     char endMarker = '>';
@@ -93,19 +122,16 @@ void recvWithStartEndMarkers() {
                                          
     while (Serial.available() > 0 && newData == false) {
         rc = Serial.read();
-                                       
-
         if (recvInProgress == true) {
             if (rc != endMarker) {
                 receivedChars[ndx] = rc;
                 ndx++;
                 if (ndx >= numChars) {
-                    ndx = numChars - 1;
+                  ndx = numChars - 1;
                 }
             }
             else {
-                receivedChars[ndx] = '\0'; // terminates the string, frankly unsure why I need 
-                                           //this but it breaks if I remove it. Bonus points if you find out why
+                receivedChars[ndx] = '\0'; 
                 recvInProgress = false;
                 ndx = 0;
                 newData = true;
@@ -122,15 +148,15 @@ void recvWithStartEndMarkers() {
 
 void parseData(){
   
-strcpy(tempChar,receivedChars); //copying recievedChar into tempChar so we dont alter recievedChar
+  strcpy(tempChar,receivedChars); 
+  char *strIndexer = strtok(tempChar,","); 
 
-char *strIndexer = strtok(tempChar,","); //dont worry about the *, this isnt a C class and I dont expect you to know how pointers work
+  driveAction = atoi(strIndexer);
+  strIndexer = strtok(NULL,",");
+  shootAction = atoi(strIndexer);
+  strIndexer = strtok(NULL,",");
+  feedAction = atoi(strIndexer);
 
-leftMotor = atoi(strIndexer);
-
-strIndexer = strtok(NULL,",");
-
-rightMotor = atoi(strIndexer);
 
 }
 
@@ -138,39 +164,103 @@ rightMotor = atoi(strIndexer);
 
 void sendRecievedData(){
   
-  // print current location
    Serial.print(x_dist);
    Serial.print(',');
-   Serial.print(y_dist);
-   // print motor encoder values
-   Serial.print(',');
-   Serial.print(leftMotor);
-   Serial.print(',');
-   Serial.println(rightMotor);
-//  Serial.print(',');
-//   Serial.print(',');
-//   Serial.print(lPos); // l encoder
-//   Serial.print(',');
-//   Serial.println(rPos); // r encoder
+   Serial.println(y_dist);
+  //  Serial.print(',');
+  //  Serial.print(leftMotor);
+  //  Serial.print(',');
+  //  Serial.println(rightMotor);
 
 }
 
 //=======================================
 
 
-void commandMotors(){ // drive motors
 
-  //read the documentation for the functions that drive the motors in the astar library
+void moveStraight(){
+  analogWrite(9, 100); //ENA   pin
+  analogWrite(10, 50); //ENB pin
+  
+  // left fwd
+  digitalWrite(motor1pin1,   LOW);
+  digitalWrite(motor1pin2, HIGH);
 
-   m.setM1Speed(leftMotor);
-   m.setM2Speed(rightMotor);
-  //uncomment to drive motors
+  // right fwd
+  digitalWrite(motor2pin1, LOW);
+  digitalWrite(motor2pin2, HIGH);
 }
+
+void moveBackwards(){
+  analogWrite(9, 100); //ENA   pin
+  analogWrite(10, 50); //ENB pin
+  
+  // left bkwd
+  digitalWrite(motor1pin1,   HIGH);
+  digitalWrite(motor1pin2, LOW);
+
+  // right bkwd 
+  digitalWrite(motor2pin1, HIGH);
+  digitalWrite(motor2pin2, LOW);
+
+}
+
+void turnRight(){
+  analogWrite(9, 100); //ENA   pin
+  analogWrite(10, 50); //ENB pin
+
+
+  // left fwd
+  digitalWrite(motor1pin1,   LOW);
+  digitalWrite(motor1pin2, HIGH);
+
+  // right bkwd 
+  digitalWrite(motor2pin1, HIGH);
+  digitalWrite(motor2pin2, LOW);
+}
+
+void turnLeft(){
+  analogWrite(9, 100); //ENA   pin
+  analogWrite(10, 50); //ENB pin
+
+  // left bkwd
+  digitalWrite(motor1pin1, HIGH);
+  digitalWrite(motor1pin2, LOW);
+    
+  // right fwd
+  digitalWrite(motor2pin1, LOW);
+  digitalWrite(motor2pin2, HIGH);
+
+}
+
+void stopMoving(){
+  analogWrite(9, 0); //ENA   pin
+  analogWrite(10, 0); //ENB pin
+
+  // left bkwd
+  digitalWrite(motor1pin1, LOW);
+  digitalWrite(motor1pin2, LOW);
+    
+  // right fwd
+  digitalWrite(motor2pin1, LOW);
+  digitalWrite(motor2pin2, LOW);
+}
+
+
+
+
+
+// void commandMotors(){ // drive motors
+
+
+//    m.setM1Speed(leftMotor);
+//    m.setM2Speed(rightMotor);
+// }
 
 //=======================================
 
 
-// function for ir sensorsrft
+// still need:
 
 // function for stepper motors for feeder (PI?)
 

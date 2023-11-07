@@ -26,17 +26,19 @@ void loop() {
   analogWrite(10, 50); //ENB pin
   //(Optional)
   
-  digitalWrite(motor1pin1,   HIGH);
-  digitalWrite(motor1pin2, LOW);
+  // left bkwd
+  // digitalWrite(motor1pin1,   HIGH);
+  // digitalWrite(motor1pin2, LOW);
 
-  digitalWrite(motor2pin1, HIGH);
-  digitalWrite(motor2pin2, LOW);
-  delay(3000);
+  // right bkwd 
+  // digitalWrite(motor2pin1, HIGH);
+  // digitalWrite(motor2pin2, LOW);
 
+  // left fwd
   // digitalWrite(motor1pin1,   LOW);
   // digitalWrite(motor1pin2, HIGH);
 
-  // digitalWrite(motor2pin1, LOW);
-  //  digitalWrite(motor2pin2, HIGH);
-  // delay(3000);
+  // right fwd
+  digitalWrite(motor2pin1, LOW);
+  digitalWrite(motor2pin2, HIGH);
 }
