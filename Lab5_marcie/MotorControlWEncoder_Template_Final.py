@@ -10,9 +10,9 @@ from gpiozero import RotaryEncoder
 
 #assign parameter values
 ppr = 48 #pulse per rev for encoder 
-tsample = 0.01 # sampling period for encoder reading
-tdisp = 0.01 # freqency to show encoder reading on terminal
-tstop = 6
+tsample = 0.1 # sampling period for encoder reading
+tdisp = 0.1 # freqency to show encoder reading on terminal
+tstop = 20
 
 ### idk what this is below
 K = 0.2
@@ -24,11 +24,11 @@ k = 20
 
 Gp = 2
 
-#values for motor with without writing on it
-kp = 3
+#values for motor with without load on it
+kp = 0.99
 ki = 50
-kd = 0.005 
-setPoint = 20
+kd = 0.01
+setPoint = 15
 
 # pid = PID(Kp, Ki, Kd, setPoint)
 
@@ -43,9 +43,9 @@ encoder = RotaryEncoder(24, 25, max_steps=0)
 
 
 # Define motor pins forward pin (in1) 22, backward (in2) 23, PWM (en) 24
-in1 = 7
-in2 = 8
-en = 11
+in1 = 6
+in2 = 5
+en = 23
 
 
 # initialize values
@@ -83,14 +83,12 @@ while tcurr <= tstop:
 		# out = p.update(pid(velCurr))
 		# p.start(abs(out))
 		error = setPoint-velCurr
-		cumError += error*(tdisp)
+		cumError = cumError + error*(tdisp)
 		rateError = (error-lastSpeedError)/tdisp
-		out = abs(kp*error + ki*cumError + kd*rateError)
-		if(out > 100):
-			out = 100
-		p.start(out)
+		out = kp*error + ki*cumError
+		p.ChangeDutyCycle()
 		# print(velCurr , out, tcurr)
-		print(velCurr, tcurr)
+		print(out, tcurr)
 		ts.append(tcurr)
 		revs.append(velCurr)
 
