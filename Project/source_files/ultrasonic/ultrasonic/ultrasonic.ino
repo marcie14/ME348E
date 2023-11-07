@@ -4,8 +4,8 @@
 
 // Pin set up + library initializations
 // Ultrasonic
-const byte x_trig_pin = 5;
-const byte y_trig_pin = 7;
+const byte x_trig_pin = 12;
+const byte y_trig_pin = 13;
 const byte x_echo_pin = 6;
 const byte y_echo_pin = 8; 
 
