@@ -159,7 +159,7 @@ if __name__ == '__main__':
                 if IR == [1,0,0] or IR == [1,1,0]:
                     print('ir detected on left')
                     if step == 0:
-                        if y_dist != left_position:
+                        if not left_position - position_tolerance <= y_dist <= left_position + position_tolerance:
                             driveAction = 3 # turn left
                         else: # y_dist = left position
                             driveAction = 1 # move straight
