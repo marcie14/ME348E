@@ -71,3 +71,4 @@ if __name__ == '__main__':
             line = ser.readline().decode('utf-8') # read incoming string
             line=line.split(',') # split incoming string into list with comma delimeter
             print(line)
+            print('in if')
