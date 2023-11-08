@@ -40,7 +40,7 @@ menu://applications/Development/arduino.desktop
   pinMode(motor2pin1, OUTPUT);
   pinMode(motor2pin2, OUTPUT);
 
-  pinMode(9,   OUTPUT); 
+  pinMode(9,  OUTPUT); 
   pinMode(10, OUTPUT);
 
   Serial.begin(115200);
@@ -53,25 +53,25 @@ void loop() {
   x_dist = X_sensor.measureDistanceCm();
   y_dist = Y_sensor.measureDistanceCm();
   
-  if (y_dist < 5) {
-    Serial.println("stop moving");
-    stopMoving();
-  }
-  else if (x_dist < 5){
-    Serial.println("turnRight");
-    turnRight();
-  }
-  else{
-    Serial.println("moveStraight");
-    moveStraight();
-  }
+  // if (y_dist < 5) {
+  //   Serial.println("stop moving");
+  //   stopMoving();
+  // }
+  // else if (x_dist < 5){
+  //   Serial.println("turnRight");
+  //   turnRight();
+  // }
+  // else{
+  //   Serial.println("moveStraight");
+  //   moveStraight();
+  // }
   
   
   recvWithStartEndMarkers();
   sendRecievedData();
 
 
- if (newData == true){
+//  if (newData == true){
        
   parseData();
   // switch (driveAction) {
@@ -105,8 +105,8 @@ void loop() {
   //   default: // error
   //     feedAction = 0;
   // }
-  newData = false;
-  }
+  // newData = false;
+  // }
 }
 
 //====================================

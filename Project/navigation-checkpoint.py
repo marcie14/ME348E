@@ -78,8 +78,8 @@ if __name__ == '__main__':
         now = time.time() # constantly reassign new timestamp
         ser.write(String2Send.encode('utf-8'))
         sendString(port,115200,String2Send,0.0001) #turn right motor command here
-        print('intrue')
-        
+        # print('intrue')
+        print(ser.in_waiting)
         if ser.in_waiting > 0:  #we wait until the arduino has sent something to us before we try to read anything from the serial port.
             print('in if ser waiting')
             if abs(old-now) >= interval:
