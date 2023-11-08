@@ -9,7 +9,7 @@ from sendStringScript import sendString # for communicating with arduino
 
 ##### set up variables #####
 # port = '/dev/ttyACMO' # RPi port for communicating to arduino board
-port = '/dev/cu.usbmodem101' # marcie mac port
+port = '/dev/cu.usbmodem2101' # marcie mac port
 
 now = time.time() # stores time for changing motor actions constantly updates
 old = 0           # stores time since last change in motor actions

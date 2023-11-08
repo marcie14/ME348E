@@ -176,11 +176,11 @@ void sendRecievedData(){
 
 
 void moveStraight(){
-  analogWrite(9, 100); //ENA   pin
-  analogWrite(10, 50); //ENB pin
+  analogWrite(9, 80); //ENA   pin
+  analogWrite(10, 80); //ENB pin
   
   // left fwd
-  digitalWrite(motor1pin1,   LOW);
+  digitalWrite(motor1pin1, LOW);
   digitalWrite(motor1pin2, HIGH);
 
   // right fwd
@@ -189,11 +189,11 @@ void moveStraight(){
 }
 
 void moveBackwards(){
-  analogWrite(9, 100); //ENA   pin
-  analogWrite(10, 50); //ENB pin
+  analogWrite(9, 80); //ENA   pin
+  analogWrite(10, 80); //ENB pin
   
   // left bkwd
-  digitalWrite(motor1pin1,   HIGH);
+  digitalWrite(motor1pin1, HIGH);
   digitalWrite(motor1pin2, LOW);
 
   // right bkwd 
@@ -203,12 +203,12 @@ void moveBackwards(){
 }
 
 void turnRight(){
-  analogWrite(9, 100); //ENA   pin
-  analogWrite(10, 50); //ENB pin
+  analogWrite(9, 80); //ENA   pin
+  analogWrite(10, 80); //ENB pin
 
 
   // left fwd
-  digitalWrite(motor1pin1,   LOW);
+  digitalWrite(motor1pin1, LOW);
   digitalWrite(motor1pin2, HIGH);
 
   // right bkwd 
@@ -217,8 +217,8 @@ void turnRight(){
 }
 
 void turnLeft(){
-  analogWrite(9, 100); //ENA   pin
-  analogWrite(10, 50); //ENB pin
+  analogWrite(9, 80); //ENA   pin
+  analogWrite(10, 80); //ENB pin
 
   // left bkwd
   digitalWrite(motor1pin1, HIGH);
