@@ -28,6 +28,8 @@ int shootAction;
 int feedAction;
 float x_dist; // ultrasonic
 float y_dist; // ultrasonic
+int sendX; // target X
+int sendY; // target Y
 int leftMotor; // drive motor speed
 int rightMotor; // drive motor speed
 
@@ -44,7 +46,7 @@ menu://applications/Development/arduino.desktop
   pinMode(10, OUTPUT);
 
   Serial.begin(115200);
-  Serial.println("<Arduino is ready>");
+  // Serial.println("<Arduino is ready>");
 
 }   
 
@@ -52,76 +54,19 @@ void loop() {
 
   x_dist = X_sensor.measureDistanceCm();
   y_dist = Y_sensor.measureDistanceCm();
-  
-  
-  if (x_dist < 130){ // center 75, left 20, right 130
-    Serial.println("turnRight");
-    turnRight();
-    delay(100);
-    moveStraight();
-    delay(200);
-  }
-  else if (x_dist > 140){ // center 90, left 32, right 140
-    Serial.println("turnLeft");
-    turnLeft();
-    delay(100);
-    moveStraight();
-    delay(200);
-  }
-  else if (y_dist < 41) { // center 41
-    Serial.println("stop moving");
-    stopMoving();
-    delay(50);
-  }
-  else {
-    Serial.println("moveStraight");
-    moveStraight();
-    delay(50);
-  }
-  
-  
+
   recvWithStartEndMarkers();
-  sendRecievedData();
 
-
-//  if (newData == true){
-       
-  parseData();
-  // switch (driveAction) {
-  //   case 0: // stopMoving
-  //     stopMoving();
-  //   case 1: // moveStraight
-  //     moveStraight();
-  //   case 2: // turn Right
-  //     turnRight();
-  //   case 3: // turn Left
-  //     turnLeft();
-  //   case 4: // move Backwards
-  //     moveBackwards();
-  //   default: // error
-  //     moveStraight();
-
-  // }
-  // switch (shootAction) {
-  //   case 0: // prime + pause
-  //     shootAction = 0; /////////FIX
-  //   case 1: // shoot
-  //     shootAction = 0;
-  //   default: // error
-  //     shootAction = 0;
-  // }
-  // switch (feedAction) {
-  //   case 0: // prime + pause
-  //     feedAction = 0; /////////FIX
-  //   case 1: // drop puck
-  //     feedAction = 0;
-  //   default: // error
-  //     feedAction = 0;
-  // }
-  // newData = false;
-  // }
+  if (newData == true){  
+    parseData();
+    sendRecievedData();
+    newData = false;
+  }
+  commandMotors();
+  commandFeed();
+  commandShoot();
+  // delay(100);
 }
-
 //====================================
 void recvWithStartEndMarkers() {
       
@@ -164,10 +109,13 @@ void parseData(){
 
   driveAction = atoi(strIndexer);
   strIndexer = strtok(NULL,",");
-  shootAction = atoi(strIndexer);
+  sendX = atoi(strIndexer);
+  strIndexer = strtok(NULL,",");
+  sendY = atoi(strIndexer);
   strIndexer = strtok(NULL,",");
   feedAction = atoi(strIndexer);
-
+  strIndexer = strtok(NULL,",");
+  shootAction = atoi(strIndexer);
 }
 
 //=====================================
@@ -177,15 +125,55 @@ void sendRecievedData(){
    Serial.print(x_dist);
    Serial.print(',');
    Serial.println(y_dist);
-  //  Serial.print(',');
-  //  Serial.print(leftMotor);
-  //  Serial.print(',');
-  //  Serial.println(rightMotor);
 
 }
 
 //=======================================
-
+void commandMotors(){
+  switch (driveAction) {
+    case 0:
+      moveStraight();
+      break;
+    case 1:
+      turnLeft();
+      break;
+    case 2:
+      turnRight();
+      break;
+    case 3:
+      moveBackwards();
+      break;
+    default:
+      stopMoving();
+      break;
+  }
+}
+void commandFeed(){
+  switch (feedAction) {
+    case 0:
+      // prime
+      break;
+    case 1:
+      // release + drop puck
+      break;
+    default:
+      // do nothing
+      break;
+  }
+}
+void commandShoot(){
+  switch (shootAction) {
+    case 0:
+      // prime
+      break;
+    case 1:
+      // release + shoot
+      break;
+    default:
+      // do nothing
+      break;
+  }
+}
 
 
 void moveStraight(){

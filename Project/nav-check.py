@@ -37,38 +37,74 @@ IR = [L_IR, M_IR, R_IR] # IR list
 ### ultrasonic variables
 x_dist = -1 # distance x sensor detects from wall
 y_dist = -1 # distance y sensor detects from wall
-ultra_tol = 3.00   # (cm) ultrasonic sensor tolerance
+sendX = 83 # cm to send to arduino
+sendY = 41 # cm to send to arduino
+ultra_x_tol = 10   # (cm) ultrasonic sensor tolerance (x direction)
+ultra_y_tol = 3    # (cm) ultrasonic sensor tolerance (y direction)
 wallScan = []
 frontWall = -1
 left_position = -1
 ## GOAL LOCATIONS ##
-shoot_y_dist = 30 # cm
-G1 = (38, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
-G2 = (91, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
-G3 = (57, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
+shoot_y_dist = 41 # cm
+leftGoal = (38, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
+midGoal = (91, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
+rightGoal = (57, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
 
 ### Game MODE variables
 MODE = 0 # for determining setup vs game mode
 
 ### serial communications variables
-driveAction = -1
-shootAction = -1
+driveAction = -1 #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
 feedAction = -1
-String2Send='<'+str(driveAction)+','+str(shootAction)+ ',' + str(feedAction)+'>'
+shootAction = -1
+String2Send='<'+str(driveAction)+',' + str(feedAction)+','+str(shootAction)+ '>'
+
+
+
+
+
+'''############### MAIN FUNCTION ###############'''
 
 if __name__ == '__main__':
     ser=serial.Serial(port,baudrate=115200)
     ser.reset_input_buffer() #clears anything the arduino has been sending while the Rpi isnt prepared to recieve.
-    # ser.reset_output_buffer()
+    ser.reset_output_buffer()
+    print('inif')
     
     while True:
-        sendString(port,115200,'<'+str(driveAction)+','+str(shootAction)+ ',' + str(feedAction)+'>',0.0001)
-        # L_Motor, R_Motor, Feeder, Shooter
+        ser.write(String2Send.encode('utf-8'))
+        sendString(port,115200,'<'+str(driveAction)+','+str(sendX)+','+str(sendY)+','+ str(feedAction)+','+str(shootAction)+ '>',0.0001)
         now = time.time() # constantly reassign new timestamp
-        # ser.write(String2Send.encode('utf-8'))
-        print('in true')
-        if ser.in_waiting > 0:  #we wait until the arduino has sent something to us before we try to read anything from the serial port.
-            line = ser.readline().decode('utf-8') # read incoming string
+        # print('in while')
+        try:
+            line = ser.readline().decode('utf-8')  # read incoming string
             line=line.split(',') # split incoming string into list with comma delimeter
-            print(line)
-            print('in if')
+            x_dist = float(line[0]) # distance x sensor detects from wall
+            y_dist = float(line[1]) # distance y sensor detects from wall
+            print(x_dist, y_dist)
+
+        except UnicodeDecodeError:
+            print("Received invalid byte sequence. Skipping...")
+        except:
+            print("packet dropped")
+        
+        if MODE == 0:
+            # rotate 360 and scan walls, find furthest wall
+            # orient towards IR sensors
+        elif MODE == 1:
+            
+        if (y_dist < sendY): 
+            stopMoving();
+        
+        elif (x_dist == -1):
+            stopMoving();
+        
+        elif (x_dist < sendX - x_tol):# center 75, left 20, right 130
+            turnRight();
+        
+        elif (x_dist > sendX + tol): # center 90, left 32, right 140
+            turnLeft();
+        
+        else:
+            moveStraight();
+        
