@@ -91,20 +91,26 @@ if __name__ == '__main__':
         if MODE == 0:
             # rotate 360 and scan walls, find furthest wall
             # orient towards IR sensors
-        elif MODE == 1:
+            # move forward to shoot_y_dist
+            break
             
-        if (y_dist < sendY): 
-            stopMoving();
+        elif MODE == 1:
+            # check for LMR IR sensors
+            sendX = leftGoal[0]
+            sendY = leftGoal[1]
+            #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
+            if (y_dist < sendY): 
+                driveAction = -1 # stop moving
+            
+            elif (sendX - ultra_x_tol <= x_dist <= sendX + ultra_x_tol):
+                driveAction = 0 # forward
+            
+            elif (x_dist < sendX - ultra_x_tol):# center 75, left 20, right 130
+                driveAction = 1 # left
+            
+            elif (x_dist > sendX + ultra_x_tol): # center 90, left 32, right 140
+                driveAction = 2 # right
         
-        elif (x_dist == -1):
-            stopMoving();
-        
-        elif (x_dist < sendX - x_tol):# center 75, left 20, right 130
-            turnRight();
-        
-        elif (x_dist > sendX + tol): # center 90, left 32, right 140
-            turnLeft();
-        
-        else:
-            moveStraight();
-        
+            else:
+                driveAction = 0 # forward
+            
