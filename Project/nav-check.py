@@ -95,14 +95,24 @@ if __name__ == '__main__':
             # GPIO.cleanup()
         
         # if GPIO.input(L_IR_pin) == 0:
-        #     IR = 0 # IR sensor detects something! (active low)
+        #     L_IR = 0 # IR sensor detects something! (active low)
         # else:
-        #     IR = 1
+        #     L_IR = 1
+        # if GPIO.input(M_IR_pin) == 0:
+        #     M_IR = 0 # IR sensor detects something! (active low)
+        # else:
+        #     M_IR = 1
+        # if GPIO.input(R_IR_pin) == 0:
+        #     R_IR = 0 # IR sensor detects something! (active low)
+        # else:
+        #     R_IR = 1
 
-        IR = 0
+        L_IR = random.randint(0,1)
+        M_IR = random.randint(0,1)
+        R_IR = random.randint(0,1)
+        IR = [L_IR, M_IR, R_IR] # IR list
         MODE = 1
         if MODE == 0:
-            # rotate 360 and scan walls, find furthest wall
             
             driveAction = 2 # rotate right
             startTurn = now
