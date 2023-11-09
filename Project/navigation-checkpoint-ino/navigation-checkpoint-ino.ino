@@ -53,18 +53,31 @@ void loop() {
   x_dist = X_sensor.measureDistanceCm();
   y_dist = Y_sensor.measureDistanceCm();
   
-  // if (y_dist < 5) {
-  //   Serial.println("stop moving");
-  //   stopMoving();
-  // }
-  // else if (x_dist < 5){
-  //   Serial.println("turnRight");
-  //   turnRight();
-  // }
-  // else{
-  //   Serial.println("moveStraight");
-  //   moveStraight();
-  // }
+  
+  if (x_dist < 130){ // center 75, left 20, right 130
+    Serial.println("turnRight");
+    turnRight();
+    delay(100);
+    moveStraight();
+    delay(200);
+  }
+  else if (x_dist > 140){ // center 90, left 32, right 140
+    Serial.println("turnLeft");
+    turnLeft();
+    delay(100);
+    moveStraight();
+    delay(200);
+  }
+  else if (y_dist < 41) { // center 41
+    Serial.println("stop moving");
+    stopMoving();
+    delay(50);
+  }
+  else {
+    Serial.println("moveStraight");
+    moveStraight();
+    delay(50);
+  }
   
   
   recvWithStartEndMarkers();
