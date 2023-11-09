@@ -80,6 +80,9 @@ if __name__ == '__main__':
         sendString(port,115200,String2Send,0.0001) #turn right motor command here
         # print('intrue')
         print(ser.in_waiting)
+        
+        
+            
         if ser.in_waiting > 0:  #we wait until the arduino has sent something to us before we try to read anything from the serial port.
             print('in if ser waiting')
             if abs(old-now) >= interval:
@@ -114,75 +117,75 @@ if __name__ == '__main__':
                     # GPIO.cleanup() # commented out for debug no MAC
                     # break
 
-            if MODE == 0: # scan walls                
-                driveAction = 2 # rotate right to scan walls
-                startTurn = now # mark time when start turn to scan
-                if abs(oldTurn-startTurn) < 60: # scan walls for 6 seconds
-                    wallScan = wallScan + [y_dist]
-                else:
-                    driveAction = 0 # stop scanning walls if more than 6 seconds
+            # if MODE == 0: # scan walls                
+            #     driveAction = 2 # rotate right to scan walls
+            #     startTurn = now # mark time when start turn to scan
+            #     if abs(oldTurn-startTurn) < 60: # scan walls for 6 seconds
+            #         wallScan = wallScan + [y_dist]
+            #     else:
+            #         driveAction = 0 # stop scanning walls if more than 6 seconds
                 
-                frontWall = max(wallScan)
+            #     frontWall = max(wallScan)
                 
-                # set dir = front sensor detects front wall, left to left
-                # move forward to G2 = (x,y)
-                MODE == 1
-                
-                
-                
-            elif MODE == 1: # rotate towards front wall
-                if y_dist < frontWall:
-                    driveAction = 2
-                elif y_dist > frontWall:
-                    driveAction = 3
-                else: ## y_dist == front wall
-                    driveAction = 0
-                    MODE = 2
-                    break
+            #     # set dir = front sensor detects front wall, left to left
+            #     # move forward to G2 = (x,y)
+            #     MODE == 1
                 
                 
                 
-            elif MODE == 2: # move forwards to shooting area
-                if y_dist < shoot_y_distance:
-                    driveAction = 1 # move forward
-                else:
-                    driveAction = 0 # stop moving
-                    left_position = x_dist # save x position for next MODE
-                    MODE = 3
-                    break
+            # elif MODE == 1: # rotate towards front wall
+            #     if y_dist < frontWall:
+            #         driveAction = 2
+            #     elif y_dist > frontWall:
+            #         driveAction = 3
+            #     else: ## y_dist == front wall
+            #         driveAction = 0
+            #         MODE = 2
+            #         break
                 
                 
                 
-            elif MODE == 3:
-                # detect IR sensor. L,M,R
-                step = 0
-                if IR == [1,0,0] or IR == [1,1,0]:
-                    print('ir detected on left')
-                    if step == 0:
-                        if not left_position - position_tolerance <= y_dist <= left_position + position_tolerance:
-                            driveAction = 3 # turn left
-                        else: # y_dist = left position
-                            driveAction = 1 # move straight
-                            step = 1
-                    elif step == 1:
-                        break
-                        # if y_dist 
-                    # move forward until hit G1 or G2 with tolerance
-                    # pivot 90 deg CW
-                    # validate IR reading and G1 or G2 location
-                    # shoot
-                elif IR == [0,1,0]:
-                    print('ir detected center')
-                    # shoot
-                elif IR == [0,1,1] or IR == [0,0,1]:
-                    print('ir detected on right')
-                    # pivot 90 deg CW
-                    # move forward until hit G2 or G3 with tolerance
-                    # pivot 90 deg CCW
-                    # validate IR reading and G1 or G2 location
-                    # shoot
-                else: ## [0,0,0] or [1,0,1]
-                    print('no ir detected...')
-                    # ERROR or game over
+            # elif MODE == 2: # move forwards to shooting area
+            #     if y_dist < shoot_y_distance:
+            #         driveAction = 1 # move forward
+            #     else:
+            #         driveAction = 0 # stop moving
+            #         left_position = x_dist # save x position for next MODE
+            #         MODE = 3
+            #         break
+                
+                
+                
+            # elif MODE == 3:
+            #     # detect IR sensor. L,M,R
+            #     step = 0
+            #     if IR == [1,0,0] or IR == [1,1,0]:
+            #         print('ir detected on left')
+            #         if step == 0:
+            #             if not left_position - position_tolerance <= y_dist <= left_position + position_tolerance:
+            #                 driveAction = 3 # turn left
+            #             else: # y_dist = left position
+            #                 driveAction = 1 # move straight
+            #                 step = 1
+            #         elif step == 1:
+            #             break
+            #             # if y_dist 
+            #         # move forward until hit G1 or G2 with tolerance
+            #         # pivot 90 deg CW
+            #         # validate IR reading and G1 or G2 location
+            #         # shoot
+            #     elif IR == [0,1,0]:
+            #         print('ir detected center')
+            #         # shoot
+            #     elif IR == [0,1,1] or IR == [0,0,1]:
+            #         print('ir detected on right')
+            #         # pivot 90 deg CW
+            #         # move forward until hit G2 or G3 with tolerance
+            #         # pivot 90 deg CCW
+            #         # validate IR reading and G1 or G2 location
+            #         # shoot
+            #     else: ## [0,0,0] or [1,0,1]
+            #         print('no ir detected...')
+            #         # ERROR or game over
                 
            

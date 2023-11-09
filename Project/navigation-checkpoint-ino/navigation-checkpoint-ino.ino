@@ -1,5 +1,5 @@
 #include <HCSR04.h>
-
+#include <ezButton.h>
 boolean newData = true;
 
 // data parsing
@@ -17,10 +17,21 @@ UltraSonicDistanceSensor X_sensor(x_trig_pin, x_echo_pin);
 UltraSonicDistanceSensor Y_sensor(y_trig_pin, y_echo_pin);
 
 // drive motors
-int motor1pin1 = 2;
-int motor1pin2 = 3;
-int motor2pin1 = 4;
-int motor2pin2 = 5;
+int motor1pin1 = 2; // left
+int motor1pin2 = 3; // left
+int motor2pin1 = 4; // right
+int motor2pin2 = 5; // right
+
+// feeder
+int feederpin1 = 6;
+int feederpin2 = 7;
+ezButton f_prime_switch(41); // limit switch (1 = primed)
+ezButton f_drop_switch(43); // limit switch (1 = dropped)
+
+// shooter 
+int shooterpin1 = 6;
+int shooterpin2 = 7;
+ezButton shoot_switch(39); // limit switch (1 = ?)
 
 // variable initializations
 int driveAction;
@@ -41,9 +52,21 @@ menu://applications/Development/arduino.desktop
   pinMode(motor1pin2, OUTPUT);
   pinMode(motor2pin1, OUTPUT);
   pinMode(motor2pin2, OUTPUT);
-
+  
   pinMode(9,  OUTPUT); 
   pinMode(10, OUTPUT);
+
+  pinMode(feederpin1, OUTPUT);
+  pinMode(feederpin2, OUTPUT);
+  pinMode(shooterpin1, OUTPUT);
+  pinMode(shooterpin2, OUTPUT);
+  pinMode(12,  OUTPUT); 
+  pinMode(13, OUTPUT);
+
+  f_prime_switch.setDebounceTime(50); // set debounce time to 50 milliseconds
+  f_drop_switch.setDebounceTime(50); // set debounce time to 50 milliseconds
+  shoot_switch.setDebounceTime(50); // set debounce time to 50 milliseconds
+
 
   Serial.begin(115200);
   // Serial.println("<Arduino is ready>");
@@ -51,6 +74,9 @@ menu://applications/Development/arduino.desktop
 }   
 
 void loop() {
+  f_prime_switch.loop();
+  f_drop_switch.loop();
+  shoot_switch.loop();
 
   x_dist = X_sensor.measureDistanceCm();
   y_dist = Y_sensor.measureDistanceCm();
@@ -159,12 +185,25 @@ void commandFeed(){
   switch (feedAction) {
     case 0:
       // prime
+      if (f_prime_switch.isPressed()){
+        feederStop();
+      }
+      else{
+        feederPrime();
+      }
       break;
     case 1:
       // release + drop puck
+      if (f_drop_switch.isPressed()){
+        feederDrop();
+      }
+      else{
+        feederStop();
+      }
       break;
     default:
       // do nothing
+      feederStop();
       break;
   }
 }
@@ -172,17 +211,76 @@ void commandShoot(){
   switch (shootAction) {
     case 0:
       // prime
+      if (shoot_switch.isPressed()){
+        shooterStop();
+      }
+      else{
+        shooterPrime();
+      }
       break;
     case 1:
       // release + shoot
+      if (shoot_switch.isPressed()){
+        shooterShoot();
+      }
+      else{
+        shooterStop();
+      }
       break;
     default:
       // do nothing
+      shooterStop();
       break;
   }
 }
 
 
+
+
+
+
+// ========== Feeder Motor Function ==========
+void feederPrime(){
+  analogWrite(12, 80); //ENA   pin
+  
+  // bckwd
+  digitalWrite(feederpin1, LOW);
+  digitalWrite(feederpin2, HIGH);
+}
+void feederDrop(){
+  analogWrite(12, 80); //ENA   pin
+  
+  // fwd
+  digitalWrite(feederpin1, HIGH);
+  digitalWrite(feederpin2, LOW);
+
+}
+void feederStop(){
+  analogWrite(12, 0); //ENA   pin
+    // off
+  digitalWrite(feederpin1, LOW);
+  digitalWrite(feederpin2, LOW);
+}
+// ========== Shooter Motor Function ==========
+void shooterPrime(){
+  analogWrite(13, 80); //ENA   pin
+  // fwd
+  digitalWrite(shooterpin1, LOW);
+  digitalWrite(shooterpin2, HIGH);
+}
+void shooterShoot(){
+  analogWrite(13, 80); //ENA   pin
+  // fwd
+  digitalWrite(shooterpin1, LOW);
+  digitalWrite(shooterpin2, HIGH);
+}
+void shooterStop(){
+  analogWrite(13, 0); //ENA   pin
+    // off
+  digitalWrite(shooterpin1, LOW);
+  digitalWrite(shooterpin2, LOW);
+}
+// =========== Drive Motors Functions ==============
 void moveStraight(){
   analogWrite(9, 80); //ENA   pin
   analogWrite(10, 80); //ENB pin
@@ -194,6 +292,7 @@ void moveStraight(){
   // right fwd
   digitalWrite(motor2pin1, LOW);
   digitalWrite(motor2pin2, HIGH);
+  
 }
 
 void moveBackwards(){

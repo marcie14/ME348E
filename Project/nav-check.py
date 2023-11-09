@@ -7,6 +7,7 @@ import numpy as np  # for calcs
 from sendStringScript import sendString # for communicating with arduino
 # import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
 import random # for randomizing actions
+import keyboard # for keyboard input
 
 
 '''##### initialize setup variables  #####'''
@@ -81,6 +82,12 @@ if __name__ == '__main__':
         sendString(port,115200,'<'+str(driveAction)+','+str(sendX)+','+str(sendY)+','+ str(feedAction)+','+str(shootAction)+ '>',0.0001)
         now = time.time() # constantly reassign new timestamp
         # print('in while')
+        if keyboard.is_pressed('q'):  # if key 'q' is pressed 
+            print('You Pressed A Key!')
+            driveAction = input('driveAction: ')
+            feedAction = input('feedAction: ')
+            shootAction = input('shootAction: ')
+            
         try:
             line = ser.readline().decode('utf-8')  # read incoming string
             line=line.split(',') # split incoming string into list with comma delimeter
@@ -107,59 +114,61 @@ if __name__ == '__main__':
         # else:
         #     R_IR = 1
 
-        L_IR = random.randint(0,1)
-        M_IR = random.randint(0,1)
-        R_IR = random.randint(0,1)
-        IR = [L_IR, M_IR, R_IR] # IR list
-        MODE = 1
-        if MODE == 0:
+        # L_IR = random.randint(0,1)
+        # M_IR = random.randint(0,1)
+        # R_IR = random.randint(0,1)
+        # IR = [L_IR, M_IR, R_IR] # IR list
+        # MODE = 1
+        
+        #### below 
+        # if MODE == 0:
             
-            driveAction = 2 # rotate right
-            startTurn = now
+        #     driveAction = 2 # rotate right
+        #     startTurn = now
             
-            if startTurn - oldTurn > 5:
-                oldTurn = startTurn
-                MODE = 1
-            MODE = 1
-            # orient towards IR sensors
-            # move forward to shoot_y_dist
-            break
+        #     if startTurn - oldTurn > 5:
+        #         oldTurn = startTurn
+        #         MODE = 1
+        #     MODE = 1
+        #     # orient towards IR sensors
+        #     # move forward to shoot_y_dist
+        #     break
             
-        elif MODE == 1:
-            # check for LMR IR sensors
-            if IR == 0: # if IR sensor detects something
-                # move forward
-                driveAction = 0
+        # elif MODE == 1:
+        #     # check for LMR IR sensors
+        #     if IR == 0: # if IR sensor detects something
+        #         # move forward
+        #         driveAction = 0
                 
-                #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
-                if IR == [1,0,0] or IR == [1,1,0]:
-                    print('ir detected on left')
-                    sendX = leftGoal[0]
-                    sendY = leftGoal[1]
-                elif IR == [0,1,0]:
-                    print('ir detected center')
-                    sendX = midGoal[0]
-                    sendY = midGoal[1]
+        #         #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
+        #         if IR == [1,0,0] or IR == [1,1,0]:
+        #             print('ir detected on left')
+        #             sendX = leftGoal[0]
+        #             sendY = leftGoal[1]
+        #         elif IR == [0,1,0]:
+        #             print('ir detected center')
+        #             sendX = midGoal[0]
+        #             sendY = midGoal[1]
                     
-                elif IR == [0,1,1] or IR == [0,0,1]:
-                    print('ir detected on right')
-                    sendX = rightGoal[0]
-                    sendY = rightGoal[1]
+        #         elif IR == [0,1,1] or IR == [0,0,1]:
+        #             print('ir detected on right')
+        #             sendX = rightGoal[0]
+        #             sendY = rightGoal[1]
                     
-                ### execute driveAction
-                if (y_dist < sendY): 
-                    driveAction = -1 # stop moving
+        #         ### execute driveAction
+        #         if (y_dist < sendY): 
+        #             driveAction = -1 # stop moving
                 
-                elif (sendX - ultra_x_tol <= x_dist <= sendX + ultra_x_tol):
-                    driveAction = 0 # forward
+        #         elif (sendX - ultra_x_tol <= x_dist <= sendX + ultra_x_tol):
+        #             driveAction = 0 # forward
                 
-                elif (x_dist < sendX - ultra_x_tol):# center 75, left 20, right 130
-                    driveAction = 1 # left
+        #         elif (x_dist < sendX - ultra_x_tol):# center 75, left 20, right 130
+        #             driveAction = 1 # left
                 
-                elif (x_dist > sendX + ultra_x_tol): # center 90, left 32, right 140
-                    driveAction = 2 # right
+        #         elif (x_dist > sendX + ultra_x_tol): # center 90, left 32, right 140
+        #             driveAction = 2 # right
             
-                else:
-                    driveAction = 0 # forward
-            else:
-                print('no IR')
+        #         else:
+        #             driveAction = 0 # forward
+        #     else:
+        #         print('no IR')
