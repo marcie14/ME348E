@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 import serial
 import time
@@ -25,9 +26,9 @@ k = 20
 Gp = 2
 
 #values for motor with without load on it
-kp = 0.99
-ki = 50
-kd = 0.01
+kp = 0
+ki = 0
+kd = 0
 setPoint = 15
 
 # pid = PID(Kp, Ki, Kd, setPoint)
@@ -79,16 +80,22 @@ while tcurr <= tstop:
 	tcurr = time.perf_counter()-tstart
 	posCurr = encoder.steps
 	velCurr = ((posLast-posCurr)/(tcurr-tprev))/ppr # in rev/sec
+	if(10>tcurr>6):
+		setPoint=16
+	elif(tcurr>10):
+		setPoint=12
+	else:
+		setPoint=15
 	if(np.floor(tcurr/tdisp)-np.floor(tprev/tdisp))==1:
 		# out = p.update(pid(velCurr))
 		# p.start(abs(out))
-		error = setPoint-velCurr
-		cumError = cumError + error*(tdisp)
-		rateError = (error-lastSpeedError)/tdisp
-		out = kp*error + ki*cumError
-		p.ChangeDutyCycle()
+		# error = setPoint-velCurr
+		# cumError = cumError + error*(tdisp)
+		# rateError = (error-lastSpeedError)/tdisp
+		# out = kp*error + ki*cumError + kd*rateError
+		# p.ChangeDutyCycle(out)
 		# print(velCurr , out, tcurr)
-		print(out, tcurr)
+		print(velCurr, tcurr)
 		ts.append(tcurr)
 		revs.append(velCurr)
 
