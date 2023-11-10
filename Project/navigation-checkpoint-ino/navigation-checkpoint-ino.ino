@@ -81,16 +81,16 @@ void loop() {
   x_dist = X_sensor.measureDistanceCm();
   y_dist = Y_sensor.measureDistanceCm();
 
-  // recvWithStartEndMarkers();
+  recvWithStartEndMarkers();
 
-  // if (newData == true){  
-  //   parseData();
+  if (newData == true){  
+    parseData();
     sendRecievedData();
-  //   newData = false;
-  // }
+    newData = false;
+  }
   commandMotors();
-  // commandFeed();
-  // commandShoot();
+  commandFeed();
+  commandShoot();
   // delay(100);
 }
 //====================================
@@ -174,11 +174,11 @@ void commandMotors(){
       break;
   }
 
-  if (y_dist < 41){
-    stopMoving();
-  }
-  else if (x_dist <130)
-    stopMoving();
+  // if (y_dist < 41){
+  //   stopMoving();
+  // }
+  // else if (x_dist <130)
+  //   stopMoving();
 }
 
 void commandFeed(){

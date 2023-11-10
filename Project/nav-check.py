@@ -7,8 +7,8 @@ import numpy as np  # for calcs
 from sendStringScript import sendString # for communicating with arduino
 # import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
 import random # for randomizing actions
-import keyboard # for keyboard input
-
+from pynput.keyboard import Key, Controller # for debug
+keyboard = Controller() # for debug
 
 '''##### initialize setup variables  #####'''
 ### serial communications
@@ -75,19 +75,19 @@ if __name__ == '__main__':
     ser=serial.Serial(port,baudrate=115200)
     ser.reset_input_buffer() #clears anything the arduino has been sending while the Rpi isnt prepared to recieve.
     ser.reset_output_buffer()
-    print('inif')
+    
+    
+    print('inif') # for debug
+    driveAction = input('driveAction: ') # for debug
+    feedAction = input('feedAction: ') # for debug
+    shootAction = input('shootAction: ') # for debug
     
     while True:
         ser.write(String2Send.encode('utf-8'))
         sendString(port,115200,'<'+str(driveAction)+','+str(sendX)+','+str(sendY)+','+ str(feedAction)+','+str(shootAction)+ '>',0.0001)
         now = time.time() # constantly reassign new timestamp
-        # print('in while')
-        if keyboard.is_pressed('q'):  # if key 'q' is pressed 
-            print('You Pressed A Key!')
-            driveAction = input('driveAction: ')
-            feedAction = input('feedAction: ')
-            shootAction = input('shootAction: ')
-            
+        # print('in while') # for debug
+
         try:
             line = ser.readline().decode('utf-8')  # read incoming string
             line=line.split(',') # split incoming string into list with comma delimeter
