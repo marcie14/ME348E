@@ -9,12 +9,25 @@ char tempChar[numChars]; // temporary array used for parsing
 
 // Pin set up + library initializations
 // Ultrasonic
-const byte x_trig_pin = 22;
-const byte x_echo_pin = 24;
-const byte y_trig_pin = 26;
-const byte y_echo_pin = 28; 
-UltraSonicDistanceSensor X_sensor(x_trig_pin, x_echo_pin);
-UltraSonicDistanceSensor Y_sensor(y_trig_pin, y_echo_pin);
+// const byte x_trig_pin = 22;
+// const byte x_echo_pin = 24;
+// const byte y_trig_pin = 26;
+// const byte y_echo_pin = 28; 
+const byte left_trig = 22;
+const byte left_echo = 24;
+const byte right_trig = 26;
+const byte right_echo = 28;
+const byte front_trig = 14; ///////////// FIX
+const byte front_echo = 15; ///////////// FIX
+const byte back_trig = 16; ///////////// FIX
+const byte back_echo = 17; ///////////// FIX
+
+// UltraSonicDistanceSensor X_sensor(x_trig_pin, x_echo_pin);
+// UltraSonicDistanceSensor Y_sensor(y_trig_pin, y_echo_pin);
+UltraSonicDistanceSensor left_sensor(left_trig, left_echo);
+UltraSonicDistanceSensor right_sensor(right_trig, right_echo);
+UltraSonicDistanceSensor front_sensor(front_trig, front_echo);
+UltraSonicDistanceSensor back_sensor(back_trig, back_echo);
 
 // drive motors
 int motor1pin1 = 2; // left
@@ -37,8 +50,12 @@ ezButton shoot_switch(39); // limit switch (1 = ?)
 int driveAction;
 int shootAction;
 int feedAction;
-float x_dist; // ultrasonic
-float y_dist; // ultrasonic
+// float x_dist; // ultrasonic
+// float y_dist; // ultrasonic
+float left; // ultrasonic
+float right; // ultrasonic
+float front; // ultrasonic
+float back; // ultrasonic
 int sendX; // target X
 int sendY; // target Y
 int leftMotor; // drive motor speed
@@ -78,8 +95,12 @@ void loop() {
   f_drop_switch.loop();
   shoot_switch.loop();
 
-  x_dist = X_sensor.measureDistanceCm();
-  y_dist = Y_sensor.measureDistanceCm();
+  // x_dist = X_sensor.measureDistanceCm();
+  // y_dist = Y_sensor.measureDistanceCm();
+  left = left_sensor.measureDistanceCm();
+  right = right_sensor.measureDistanceCm();
+  front = front_sensor.measureDistanceCm();
+  back = back_sensor.measureDistanceCm();
 
   recvWithStartEndMarkers();
 
@@ -148,9 +169,17 @@ void parseData(){
 
 void sendRecievedData(){
   
-   Serial.print(x_dist);
-   Serial.print(',');
-   Serial.println(y_dist);
+  //  Serial.print(x_dist);
+  //  Serial.print(',');
+  //  Serial.println(y_dist);
+
+  Serial.print(left);
+  Serial.print(',');
+  Serial.print(right);
+  Serial.print(',');
+  Serial.print(front);
+  Serial.print(',');
+  Serial.println(back);
 
 }
 

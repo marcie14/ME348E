@@ -41,8 +41,12 @@ R_IR = -1
 IR = [L_IR, M_IR, R_IR] # IR list
 
 ### ultrasonic variables
-x_dist = -1 # distance x sensor detects from wall
-y_dist = -1 # distance y sensor detects from wall
+# x_dist = -1 # distance x sensor detects from wall
+# y_dist = -1 # distance y sensor detects from wall
+left = -1 # distance left sensor detects from wall
+right = -1 # distance right sensor detects from wall
+front = -1 # distance front sensor detects from wall
+back = -1 # distance back sensor detects from wall
 sendX = 83 # cm to send to arduino
 sendY = 41 # cm to send to arduino
 ultra_x_tol = 10   # (cm) ultrasonic sensor tolerance (x direction)
@@ -78,6 +82,7 @@ if __name__ == '__main__':
     
     
     print('inif') # for debug
+    #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
     driveAction = input('driveAction: ') # for debug
     feedAction = input('feedAction: ') # for debug
     shootAction = input('shootAction: ') # for debug
@@ -93,7 +98,11 @@ if __name__ == '__main__':
             line=line.split(',') # split incoming string into list with comma delimeter
             x_dist = float(line[0]) # distance x sensor detects from wall
             y_dist = float(line[1]) # distance y sensor detects from wall
-            print(x_dist, y_dist)
+            L_IR = GPIO.input(L_IR_pin)
+            M_IR = GPIO.input(M_IR_pin)
+            R_IR = GPIO.input(R_IR_pin)
+            print('x: '+ x_dist + ', y:' +  y_dist + ', LIR: ' + L_IR + ', MIR: ' + M_IR + ', RIR: ' + R_IR)
+
 
         except UnicodeDecodeError:
             print("Received invalid byte sequence. Skipping...")
