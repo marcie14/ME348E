@@ -7,7 +7,7 @@
 import cv2
 import os
 
-path = '/Users/marciellelegarde/Desktop/ME348E/'
+path = r'/Users/marciellelegarde/Desktop/ME348E/'
 cwd = os.getcwd() # current working directory
 
 # image_type will be cow, bird, snake, or none 
@@ -39,8 +39,11 @@ def get_data(sample_count, image_type):
         data_image = frame[25:300, 25:300]
         # Create a path to the drive
         file_path = os.path.join(path, image_type, f"{count}.jpg")
+        # file_path = r'\Users\marciellelegarde\Desktop\ME348E\' + image_type + r'\' + str(count) + '.jpg'
         print(file_path)
         cv2.imwrite(file_path , data_image)
+        if not cv2.imwrite(file_path , data_image):
+          raise Exception("Could not write image")
         count+=1
     # Add an update count for how many images are collected
     cv2.putText(frame, "Collecting {} images".format(count), (5,25), cv2.FONT_HERSHEY_COMPLEX, 0.7, (0, 255, 255), 2, cv2.LINE_AA)
