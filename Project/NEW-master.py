@@ -77,25 +77,26 @@ MODE = 0 # for determining setup vs game mode
 # shootAction = 0
 
 ''' new alyssa '''
-def alyssa():
-    currentX = 0
-    currentY = 0
-    currentTheta = 0
-    # % dt = sampling period
-    # % d = diameter of wheel
-    # % encR = number of encoder pulses of right wheel currently
-    # % encL = number of encoder pulses of left wheel currently
-    # % pprR = pulses per revolution for right motor
-    # % pprL = pulses per revolution for left motor
-    while tcurr < tstop
-        omegaLeft = 2*pi*encL/(pprL*tcurr)
-        omegaRight = 2*pi*encR/(pprR*tcurr)
-        vL = omegaLeft*d/2
-        vR = omegaRight*d/2
+# def alyssa():
+#     currentX = 0
+#     currentY = 0
+#     currentTheta = 0
+#     # % dt = sampling period
+#     # % d = diameter of wheel
+#     # % encR = number of encoder pulses of right wheel currently
+#     # % encL = number of encoder pulses of left wheel currently
+#     # % pprR = pulses per revolution for right motor
+#     # % pprL = pulses per revolution for left motor
+#     while tcurr < tstop
+#         omegaLeft = 2*pi*encL/(pprL*tcurr)
+#         omegaRight = 2*pi*encR/(pprR*tcurr)
+#         vL = omegaLeft*d/2
+#         vR = omegaRight*d/2
 
-        currentTheta = (1/l)*(vR-vL)*dt
-        currentX = currentX + 0.5*(vR + vL)*cos(currentTheta)*dt
-        currentY = currentY + 0.5*(vR + vL)*sin(currentTheta)*dt
+#         currentTheta = (1/l)*(vR-vL)*dt
+#         currentX = currentX + 0.5*(vR + vL)*cos(currentTheta)*dt
+#         currentY = currentY + 0.5*(vR + vL)*sin(currentTheta)*dt
+
 
 
 
@@ -152,7 +153,19 @@ if __name__ == '__main__':
             print("packet dropped")
             # GPIO.cleanup()
         
-    
+        ## shoot sequence 
+        if f_prime_switch == 1: # if primed
+            feedAction = 2 # drop
+        if f_drop_switch == 1: # if dropped
+            feedAction = 0 # stop feeder
+            shootAction = 1 # shoot
+            
+        ## prime sequence
+        if (shoot_switch == 1) and (f_drop_switch == 1): # if shoot switch pressed (at threshold)
+            shootAction = 0 # stop shoot
+            feedAction = 1 # prime
+
+
 
         # if GPIO.input(L_IR_pin) == 0:
         #     L_IR = 0 # IR sensor detects something! (active low)
@@ -170,56 +183,59 @@ if __name__ == '__main__':
 
         # IR = [L_IR, M_IR, R_IR] # IR list
         # MODE = 1
+
         
        
-        if MODE == 0:
+        # if MODE == 0:
             
-            driveAction = 2 # rotate right
-            startTurn = now
+        #     driveAction = 2 # rotate right
+        #     startTurn = now
             
-            if startTurn - oldTurn > 5:
-                oldTurn = startTurn
-                MODE = 1
-            MODE = 1
-            # orient towards IR sensors
-            # move forward to shoot_y_dist
-            break
+        #     if startTurn - oldTurn > 5:
+        #         oldTurn = startTurn
+        #         MODE = 1
+        #     MODE = 1
+        #     # orient towards IR sensors
+        #     # move forward to shoot_y_dist
+        #     break
             
-        elif MODE == 1:
-            # check for LMR IR sensors
-            if IR == 0: # if IR sensor detects something
-                # move forward
-                driveAction = 0
+        # elif MODE == 1:
+        #     # check for LMR IR sensors
+        #     if IR == 0: # if IR sensor detects something
+        #         # move forward
+        #         driveAction = 0
                 
-                #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
-                if IR == [1,0,0] or IR == [1,1,0]:
-                    print('ir detected on left')
-                    sendX = leftGoal[0]
-                    sendY = leftGoal[1]
-                elif IR == [0,1,0]:
-                    print('ir detected center')
-                    sendX = midGoal[0]
-                    sendY = midGoal[1]
+        #         #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
+        #         if IR == [1,0,0] or IR == [1,1,0]:
+        #             print('ir detected on left')
+        #             sendX = leftGoal[0]
+        #             sendY = leftGoal[1]
+        #         elif IR == [0,1,0]:
+        #             print('ir detected center')
+        #             sendX = midGoal[0]
+        #             sendY = midGoal[1]
                     
-                elif IR == [0,1,1] or IR == [0,0,1]:
-                    print('ir detected on right')
-                    sendX = rightGoal[0]
-                    sendY = rightGoal[1]
+        #         elif IR == [0,1,1] or IR == [0,0,1]:
+        #             print('ir detected on right')
+        #             sendX = rightGoal[0]
+        #             sendY = rightGoal[1]
                     
-                ### execute driveAction
-                if (front < sendY): 
-                    driveAction = -1 # stop moving
+        #         ### execute driveAction
+        #         if (front < sendY): 
+        #             driveAction = -1 # stop moving
                 
-                elif (sendX - ultra_x_tol <= left <= sendX + ultra_x_tol):
-                    driveAction = 0 # forward
+        #         elif (sendX - ultra_x_tol <= left <= sendX + ultra_x_tol):
+        #             driveAction = 0 # forward
                 
-                elif (left < sendX - ultra_x_tol):# center 75, left 20, right 130
-                    driveAction = 1 # left
+        #         elif (left < sendX - ultra_x_tol):# center 75, left 20, right 130
+        #             driveAction = 1 # left
                 
-                elif (left > sendX + ultra_x_tol): # center 90, left 32, right 140
-                    driveAction = 2 # right
+        #         elif (left > sendX + ultra_x_tol): # center 90, left 32, right 140
+        #             driveAction = 2 # right
             
-                else:
-                    driveAction = 0 # forward
-            else:
-                print('no IR')
+        #         else:
+        #             driveAction = 0 # forward
+        #     else:
+        #         print('no IR')
+
+                
