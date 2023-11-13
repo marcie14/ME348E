@@ -5,7 +5,7 @@ import serial       # for communicating with arduino
 import time         # for non-blocking code
 import numpy as np  # for calcs
 from sendStringScript import sendString # for communicating with arduino
-import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
+# import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
 import random # for randomizing actions
 from pynput.keyboard import Key, Controller # for debug
 keyboard = Controller() # for debug
@@ -13,8 +13,8 @@ keyboard = Controller() # for debug
 
 '''##### initialize setup variables  #####'''
 ### serial communications
-port = '/dev/ttyACM0' # RPi port for communicating to arduino board
-# port = '/dev/cu.usbmodem1101' # marcie mac port
+# port = '/dev/ttyACM0' # RPi port for communicating to arduino board
+port = '/dev/cu.usbmodem142101' # brycen mac port
 
 
 
@@ -24,10 +24,10 @@ port = '/dev/ttyACM0' # RPi port for communicating to arduino board
 L_IR_pin = 17
 M_IR_pin = 27
 R_IR_pin = 22
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(L_IR_pin, GPIO.IN)
-GPIO.setup(M_IR_pin, GPIO.IN)
-GPIO.setup(R_IR_pin, GPIO.IN)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setup(L_IR_pin, GPIO.IN)
+# GPIO.setup(M_IR_pin, GPIO.IN)
+# GPIO.setup(R_IR_pin, GPIO.IN)
 
 
 
@@ -60,8 +60,12 @@ ultra_x_tol = 10   # (cm) ultrasonic sensor tolerance (x direction)
 ultra_y_tol = 3    # (cm) ultrasonic sensor tolerance (y direction)
 diffX = []
 single_DiffX = -1
+diffY = []
+single_DiffY = -1
 frontWall = -1
 left_position = -1
+turnLeft = False
+latch = 0
 ## GOAL LOCATIONS ##
 shoot_y_dist = 41 # cm
 leftGoal = (25, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
@@ -146,9 +150,9 @@ if __name__ == '__main__':
            # print(line)
            # x_dist = float(line[0]) # distance x sensor detects from wall
            # y_dist = float(line[1]) # distance y sensor detects from wall
-           L_IR = GPIO.input(L_IR_pin) # active low, 0 = detected
-           M_IR = GPIO.input(M_IR_pin) # active low, 0 = detected
-           R_IR = GPIO.input(R_IR_pin) # active low, 0 = detected
+        #    L_IR = GPIO.input(L_IR_pin) # active low, 0 = detected
+        #    M_IR = GPIO.input(M_IR_pin) # active low, 0 = detected
+        #    R_IR = GPIO.input(R_IR_pin) # active low, 0 = detected
       
            left = float(line[0])
            right = float(line[1])
@@ -163,8 +167,8 @@ if __name__ == '__main__':
 
 
            print('ultrasonics: ' + str(left) + ',' + str(right) +',' + str(front) + ',' + str(back))
-           print('IR: ' + str(L_IR) + ',' + str(M_IR) +',' + str(R_IR))
-           print('limit switches: ' + str(f_prime_switch) + ',' + str(f_drop_switch) + ',' + str(shoot_switch))
+           #print('IR: ' + str(L_IR) + ',' + str(M_IR) +',' + str(R_IR))
+           #print('limit switches: ' + str(f_prime_switch) + ',' + str(f_drop_switch) + ',' + str(shoot_switch))
            print('recieved: ' + str(rcvd_driveAction) + ',' + str(rcvd_feedAction) + ',' + str(rcvd_shootAction))
            time.sleep(0.5)
 
@@ -201,48 +205,82 @@ if __name__ == '__main__':
 
        print('MODE = ' + str(MODE))
        print('step = ' + str(step) + '\n\n')
+
+       
       
      
        if MODE == 0: # orient bot towards front
            shootAction = 3
+           if (front/back) > 5 and latch == 0:
+              latch = 1
+              step = 0
+              int_diffX = abs(left-right)
+           elif( latch == 0):
+               step = 1
+   
            if step == 0: # first step of MODE 0 - wall scan and detect squared position
-              
-            driveAction = 2 # rotate right
-            #if (abs(now - prevTurn) > 0.01): # only run every 0.5 s
-                #prevTurn = now
-            curr_diffX = [abs(left-right)] # difference between L and R ultrasonic
-            diffX = diffX + curr_diffX # add to list difference between L and R ultrasonic
-            if len(diffX) >= 10:
+            curr_diffX = abs(left-right)
+            driveAction = 4
+            print("sq")
+            if(abs(curr_diffX - int_diffX) > ultra_x_tol):
+               step = 1
+            elif(abs(front - sendY) < ultra_y_tol):
+               driveAction = 0 # stop moving
+               MODE = 1
+               step = 0
+               print('done')
+               break
+
+            if step == 1: # second step of MODE 0 - begin rotating to find squared position
+               driveAction = 2
+##               if(right > left):
+##                  driveAction = 2 # rotate right
+##               else:
+##                  driveAction = 1
+##                  turnLeft = True
+               #if (abs(now - prevTurn) > 0.01): # only run every 0.5 s
+                #   prevTurn = now
+               print("main")
+               curr_diffX = [abs(left-right)] # difference between L and R ultrasonic
+               diffX = diffX + curr_diffX # add to list difference between L and R ultrasonic
+               squareX = min(diffX)
+               curr_diffY = [front - back] # difference between L and R ultrasonic
+               diffY = diffY + curr_diffY # add to list difference between L and R ultrasonic
+               squareY = max(diffY)
+               if (curr_diffX[0] > squareX + ultra_x_tol) and (curr_diffY[0] < squareY - ultra_y_tol):
                   
                    driveAction = 0 # stop moving
-                   step = 1
+                   step = 2
           
-           if step == 1: # second step of MODE 0 - set squared position, begin rotating back to squared position
-               square = min(diffX) # we are "square" (or perpendicular) when diffX is at a min
-               driveAction = 1 # rotate left
-               step = 2
+           if step == 2: # third step of MODE 0 - set squared position, begin rotating back to squared position
+               if(turnLeft):
+                  driveAction = 2
+               else:
+                  driveAction = 1 # rotate left
+               step = 3
 
 
-           if step == 2: # third step of MODE 0 - stop moving once returned to squared position
+           if step == 3: # fourth step of MODE 0 - stop moving once returned to squared position
                #if (abs(now - prevTurn) > 0.5): # only run every 0.5 s
-                   #prevTurn = now
-                single_DiffX = abs(left-right)
-                if abs(single_DiffX - square) < ultra_x_tol: # if we are back to the point where diffX is at min (incl tolerance)
-                    driveAction =  0 # stop moving
-                    step = 3
+                #   prevTurn = now
+               single_DiffX = abs(left-right)
+               single_diffY = front - back
+               if (abs(single_DiffX - squareX) < ultra_x_tol) or (abs(single_DiffY - squareY) < ultra_y_tol): # if we are back to the point where diffX is at min (incl tolerance)
+                  driveAction = 4 # stop moving
+                  step = 4
 
 
-           if step == 3: # fourth step of MODE 0 -  move forward until reach set y distance
+           if step == 4: # fifth step of MODE 0 -  move forward until reach set y distance
                #if (abs(now - old) > 0.5): # only run every 0.5 s
-                   #old = now
-                if (abs(front - sendY) > ultra_y_tol): # while the front sensor is not the same as the set Y distance (incl tolerance)
-                    driveAction = 4 # move straight
-                else:
-                    driveAction = 0 # stop moving
-                    MODE = 1
-                    step = 0
-                    print('done')
-                    break
+                #   old = now
+               if (abs(front - sendY) < ultra_y_tol): # while the front sensor is not the same as the set Y distance (incl tolerance)
+                  driveAction = 4 # move straight
+               else:
+                  driveAction = 0 # stop moving
+                  MODE = 1
+                  step = 0
+                  print('done')
+                  break
           
            # orient towards IR sensors
            # move forward to shoot_y_dist
