@@ -30,20 +30,24 @@ UltraSonicDistanceSensor front_sensor(front_trig, front_echo);
 UltraSonicDistanceSensor back_sensor(back_trig, back_echo);
 
 // drive motors
-int motor1pin1 = 2; // left
-int motor1pin2 = 3; // left
-int motor2pin1 = 4; // right
-int motor2pin2 = 5; // right
+int motor1pin1 = 8; // left
+int motor1pin2 = 9; // left
+int motor2pin1 = 10; // right
+int motor2pin2 = 11; // right
+int L_ENA = 12;
+int R_ENB =13;
 
 // feeder
-int feederpin1 = 6;
-int feederpin2 = 7;
-ezButton f_prime_switch(41); // limit switch (1 = primed)
-ezButton f_drop_switch(43); // limit switch (1 = dropped)
+int feederpin1 = 2;
+int feederpin2 = 3;
+int feeder_ENA = 6;
+ezButton f_prime_switch(53); // limit switch (1 = primed)
+ezButton f_drop_switch(51); // limit switch (1 = dropped)
 
 // shooter 
-int shooterpin1 = 6;
-int shooterpin2 = 7;
+int shooterpin1 = 4;
+int shooterpin2 = 5;
+int shooter_ENB = 7;
 ezButton shoot_switch(39); // limit switch (1 = ?)
 
 // variable initializations
@@ -70,19 +74,19 @@ menu://applications/Development/arduino.desktop
   pinMode(motor2pin1, OUTPUT);
   pinMode(motor2pin2, OUTPUT);
   
-  pinMode(9,  OUTPUT); 
-  pinMode(10, OUTPUT);
+  pinMode(L_ENA,  OUTPUT); 
+  pinMode(R_ENB, OUTPUT);
 
   pinMode(feederpin1, OUTPUT);
   pinMode(feederpin2, OUTPUT);
   pinMode(shooterpin1, OUTPUT);
   pinMode(shooterpin2, OUTPUT);
-  pinMode(12,  OUTPUT); 
-  pinMode(13, OUTPUT);
+  pinMode(feeder_ENA,  OUTPUT); 
+  pinMode(shooter_ENB, OUTPUT);
 
-  f_prime_switch.setDebounceTime(50); // set debounce time to 50 milliseconds
-  f_drop_switch.setDebounceTime(50); // set debounce time to 50 milliseconds
-  shoot_switch.setDebounceTime(50); // set debounce time to 50 milliseconds
+//  f_prime_switch.setDebounceTime(0); // set debounce time to 50 milliseconds
+//  f_drop_switch.setDebounceTime(0); // set debounce time to 50 milliseconds
+//  shoot_switch.setDebounceTime(0); // set debounce time to 50 milliseconds
 
 
   Serial.begin(115200);
@@ -103,16 +107,25 @@ void loop() {
   back = back_sensor.measureDistanceCm();
 
   recvWithStartEndMarkers();
+//
+//  if (newData == true){  
+//    parseData();
+//    sendRecievedData();
+//    newData = false;
+//  }
+  sendRecievedData();
 
-  if (newData == true){  
-    parseData();
-    sendRecievedData();
-    newData = false;
-  }
-  commandMotors();
-  commandFeed();
-  commandShoot();
+ 
+//  commandMotors();
+//  commandFeed();
+//  commandShoot();
   // delay(100);
+
+
+
+//  testFeeder(); // DEBUG
+//  testShooter(); // DEBUG
+  testMotors(); // DEBUG
 }
 //====================================
 void recvWithStartEndMarkers() {
@@ -172,14 +185,35 @@ void sendRecievedData(){
   //  Serial.print(x_dist);
   //  Serial.print(',');
   //  Serial.println(y_dist);
-
+  Serial.print("Ultrasonic: "); // DEBUG
   Serial.print(left);
   Serial.print(',');
   Serial.print(right);
   Serial.print(',');
   Serial.print(front);
   Serial.print(',');
-  Serial.println(back);
+  Serial.print(back);
+  Serial.print(',');
+  Serial.print(" Feeder: "); // DEBUG
+  Serial.print(f_prime_switch.getState());
+  Serial.print(',');
+  Serial.print(f_drop_switch.getState());
+  Serial.print(',');
+
+  Serial.print(" Shooter: "); // DEBUG
+  Serial.print(',');
+  Serial.println(shoot_switch.isPressed());
+  Serial.print("Drive Action: "); // DEBUG
+  Serial.print(',');
+  Serial.print(driveAction);
+  Serial.print(',');
+  Serial.print("Feed Action"); // DEBUG
+  Serial.print(',');
+  Serial.print(feedAction); 
+  Serial.print(',');
+  Serial.print("Shoot Action: "); // DEBUG
+  Serial.print(',');
+  Serial.println(shootAction);
 
 }
 
@@ -214,8 +248,9 @@ void commandFeed(){
   switch (feedAction) {
     case 0:
       // prime
-      if (f_prime_switch.isPressed()){
-        feederStop();
+      if (f_prime_switch.getState() == 1){
+          feederDrop(); //DEBUG = testFeeder()
+//        feederStop(); //UNCOMMENT
       }
       else{
         feederPrime();
@@ -223,11 +258,12 @@ void commandFeed(){
       break;
     case 1:
       // release + drop puck
-      if (f_drop_switch.isPressed()){
-        feederDrop();
+      if (f_drop_switch.getState() == 1){        
+        feederPrime();//DEBUG = testFeeder()
+//      feederStop(); //UNCOMMENT
       }
       else{
-        feederStop();
+        feederDrop();
       }
       break;
     default:
@@ -239,22 +275,10 @@ void commandFeed(){
 void commandShoot(){
   switch (shootAction) {
     case 0:
-      // prime
-      if (shoot_switch.isPressed()){
-        shooterStop();
-      }
-      else{
-        shooterPrime();
-      }
+      shooterStop();
       break;
     case 1:
-      // release + shoot
-      if (shoot_switch.isPressed()){
-        shooterShoot();
-      }
-      else{
-        shooterStop();
-      }
+      shooterOn();
       break;
     default:
       // do nothing
@@ -269,15 +293,26 @@ void commandShoot(){
 
 
 // ========== Feeder Motor Function ==========
+void testFeeder() { //FOR DEBUG
+  if (f_prime_switch.getState() == 1){
+    feedAction = 1;
+  }
+  
+  if (f_drop_switch.getState() == 1){
+    feedAction = 0; 
+  }
+  commandFeed();
+  
+}
 void feederPrime(){
-  analogWrite(12, 80); //ENA   pin
+  analogWrite(feeder_ENA, 250); //ENA   pin
   
   // bckwd
   digitalWrite(feederpin1, LOW);
   digitalWrite(feederpin2, HIGH);
 }
 void feederDrop(){
-  analogWrite(12, 80); //ENA   pin
+  analogWrite(feeder_ENA, 250); //ENA   pin
   
   // fwd
   digitalWrite(feederpin1, HIGH);
@@ -285,90 +320,110 @@ void feederDrop(){
 
 }
 void feederStop(){
-  analogWrite(12, 0); //ENA   pin
+  analogWrite(feeder_ENA, 0); //ENA   pin
     // off
   digitalWrite(feederpin1, LOW);
   digitalWrite(feederpin2, LOW);
 }
 // ========== Shooter Motor Function ==========
-void shooterPrime(){
-  analogWrite(13, 80); //ENA   pin
-  // fwd
-  digitalWrite(shooterpin1, LOW);
-  digitalWrite(shooterpin2, HIGH);
+void testShooter(){ // FOR DEBUG
+  shootAction = 1;
+  commandShoot();
 }
-void shooterShoot(){
-  analogWrite(13, 80); //ENA   pin
+
+void shooterOn(){
+  analogWrite(shooter_ENB, 150); //ENA   pin
   // fwd
-  digitalWrite(shooterpin1, LOW);
-  digitalWrite(shooterpin2, HIGH);
+  digitalWrite(shooterpin1, HIGH);
+  digitalWrite(shooterpin2, LOW);
 }
 void shooterStop(){
-  analogWrite(13, 0); //ENA   pin
+  analogWrite(shooter_ENB, 0); //ENA   pin
     // off
   digitalWrite(shooterpin1, LOW);
   digitalWrite(shooterpin2, LOW);
 }
 // =========== Drive Motors Functions ==============
+void testMotors(){ // DEBUG
+  moveStraight();
+  delay(500);
+  stopMoving();
+  delay(500);
+  turnRight();
+  delay(500);
+  stopMoving();
+  delay(500);
+  turnLeft();
+  delay(500);
+  stopMoving();
+  delay(500);
+  moveBackwards();
+  delay(500);
+  stopMoving();
+  delay(500);  
+  
+}
+
+
 void moveStraight(){
-  analogWrite(9, 80); //ENA   pin
-  analogWrite(10, 80); //ENB pin
+  analogWrite(L_ENA, 150); //ENA   pin
+  analogWrite(R_ENB, 150); //ENB pin
   
   // left fwd
-  digitalWrite(motor1pin1, LOW);
-  digitalWrite(motor1pin2, HIGH);
+  digitalWrite(motor1pin1, HIGH);
+  digitalWrite(motor1pin2, LOW);
 
   // right fwd
-  digitalWrite(motor2pin1, LOW);
-  digitalWrite(motor2pin2, HIGH);
+  digitalWrite(motor2pin1, HIGH);
+  digitalWrite(motor2pin2, LOW);
   
 }
 
 void moveBackwards(){
-  analogWrite(9, 80); //ENA   pin
-  analogWrite(10, 80); //ENB pin
+  analogWrite(L_ENA, 150); //ENA   pin
+  analogWrite(R_ENB, 150); //ENB pin
   
   // left bkwd
-  digitalWrite(motor1pin1, HIGH);
-  digitalWrite(motor1pin2, LOW);
-
-  // right bkwd 
-  digitalWrite(motor2pin1, HIGH);
-  digitalWrite(motor2pin2, LOW);
-
-}
-
-void turnRight(){
-  analogWrite(9, 80); //ENA   pin
-  analogWrite(10, 80); //ENB pin
-
-
-  // left fwd
   digitalWrite(motor1pin1, LOW);
   digitalWrite(motor1pin2, HIGH);
 
   // right bkwd 
-  digitalWrite(motor2pin1, HIGH);
-  digitalWrite(motor2pin2, LOW);
-}
-
-void turnLeft(){
-  analogWrite(9, 80); //ENA   pin
-  analogWrite(10, 80); //ENB pin
-
-  // left bkwd
-  digitalWrite(motor1pin1, HIGH);
-  digitalWrite(motor1pin2, LOW);
-    
-  // right fwd
   digitalWrite(motor2pin1, LOW);
   digitalWrite(motor2pin2, HIGH);
 
 }
 
+void turnRight(){
+  analogWrite(L_ENA, 150); //ENA   pin
+  analogWrite(R_ENB, 150); //ENB pin
+
+
+  // left fwd
+  digitalWrite(motor1pin1, HIGH);
+  digitalWrite(motor1pin2, LOW);
+
+  // right bkwd 
+  digitalWrite(motor2pin1, LOW);
+  digitalWrite(motor2pin2, HIGH);
+}
+
+void turnLeft(){
+  analogWrite(L_ENA, 150); //ENA   pin
+  analogWrite(R_ENB, 150); //ENB pin
+
+  // left bkwd
+  digitalWrite(motor1pin1, LOW);
+  digitalWrite(motor1pin2, HIGH);
+    
+  // right fwd
+  digitalWrite(motor2pin1, HIGH);
+  digitalWrite(motor2pin2, LOW);
+
+}
+
 void stopMoving(){
-  analogWrite(9, 0); //ENA   pin
-  analogWrite(10, 0); //ENB pin
+  analogWrite(L_ENA, 0); //ENA   pin
+  analogWrite(R_ENB, 0); //ENB pin
 
   // left bkwd
   digitalWrite(motor1pin1, LOW);
