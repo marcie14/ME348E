@@ -1,24 +1,4 @@
 #### V2 
-''' new alyssa '''
-
-currentX = 0
-currentY = 0
-currentTheta = 0
-# % dt = sampling period
-# % d = diameter of wheel
-# % encR = number of encoder pulses of right wheel currently
-# % encL = number of encoder pulses of left wheel currently
-# % pprR = pulses per revolution for right motor
-# % pprL = pulses per revolution for left motor
-while tcurr < tstop
-    omegaLeft = 2*pi*encL/(pprL*tcurr)
-    omegaRight = 2*pi*encR/(pprR*tcurr)
-    vL = omegaLeft*d/2
-    vR = omegaRight*d/2
-
-    currentTheta = (1/l)*(vR-vL)*dt
-    currentX = currentX + 0.5*(vR + vL)*cos(currentTheta)*dt
-    currentY = currentY + 0.5*(vR + vL)*sin(currentTheta)*dt
          
 '''##### import required libraries #####'''
 import serial       # for communicating with arduino
@@ -96,7 +76,26 @@ MODE = 0 # for determining setup vs game mode
 # feedAction = 1
 # shootAction = 0
 
+''' new alyssa '''
+def alyssa():
+    currentX = 0
+    currentY = 0
+    currentTheta = 0
+    # % dt = sampling period
+    # % d = diameter of wheel
+    # % encR = number of encoder pulses of right wheel currently
+    # % encL = number of encoder pulses of left wheel currently
+    # % pprR = pulses per revolution for right motor
+    # % pprL = pulses per revolution for left motor
+    while tcurr < tstop
+        omegaLeft = 2*pi*encL/(pprL*tcurr)
+        omegaRight = 2*pi*encR/(pprR*tcurr)
+        vL = omegaLeft*d/2
+        vR = omegaRight*d/2
 
+        currentTheta = (1/l)*(vR-vL)*dt
+        currentX = currentX + 0.5*(vR + vL)*cos(currentTheta)*dt
+        currentY = currentY + 0.5*(vR + vL)*sin(currentTheta)*dt
 
 
 
@@ -208,16 +207,16 @@ if __name__ == '__main__':
                     sendY = rightGoal[1]
                     
                 ### execute driveAction
-                if (y_dist < sendY): 
+                if (front < sendY): 
                     driveAction = -1 # stop moving
                 
-                elif (sendX - ultra_x_tol <= x_dist <= sendX + ultra_x_tol):
+                elif (sendX - ultra_x_tol <= left <= sendX + ultra_x_tol):
                     driveAction = 0 # forward
                 
-                elif (x_dist < sendX - ultra_x_tol):# center 75, left 20, right 130
+                elif (left < sendX - ultra_x_tol):# center 75, left 20, right 130
                     driveAction = 1 # left
                 
-                elif (x_dist > sendX + ultra_x_tol): # center 90, left 32, right 140
+                elif (left > sendX + ultra_x_tol): # center 90, left 32, right 140
                     driveAction = 2 # right
             
                 else:
