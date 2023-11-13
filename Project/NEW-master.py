@@ -5,7 +5,7 @@ import serial       # for communicating with arduino
 import time         # for non-blocking code
 import numpy as np  # for calcs
 from sendStringScript import sendString # for communicating with arduino
-# import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
+import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
 import random # for randomizing actions
 from pynput.keyboard import Key, Controller # for debug
 keyboard = Controller() # for debug
@@ -21,10 +21,10 @@ port = '/dev/ttyACM0' # RPi port for communicating to arduino board
 L_IR_pin = 4
 M_IR_pin = 17
 R_IR_pin = 18
-# GPIO.setmode(GPIO.BCM)
-# GPIO.setup(L_IR_pin, GPIO.IN)
-# GPIO.setup(M_IR_pin, GPIO.IN)
-# GPIO.setup(R_IR_pin, GPIO.IN)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(L_IR_pin, GPIO.IN)
+GPIO.setup(M_IR_pin, GPIO.IN)
+GPIO.setup(R_IR_pin, GPIO.IN)
 
 
 '''##### initialize global variables #####'''
@@ -107,9 +107,9 @@ if __name__ == '__main__':
             # print(line)
             # x_dist = float(line[0]) # distance x sensor detects from wall
             # y_dist = float(line[1]) # distance y sensor detects from wall
-            # L_IR = GPIO.input(L_IR_pin)
-            # M_IR = GPIO.input(M_IR_pin)
-            # R_IR = GPIO.input(R_IR_pin)
+            L_IR = GPIO.input(L_IR_pin)
+            M_IR = GPIO.input(M_IR_pin)
+            R_IR = GPIO.input(R_IR_pin)
         
             left = float(line[0])
             right = float(line[1])
@@ -133,20 +133,6 @@ if __name__ == '__main__':
             print("packet dropped")
             # GPIO.cleanup()
         
-        ### Shooting sequence
-        if f_prime_switch == 1: # if primed
-            feedAction = 2 # drop
-        if f_drop_switch == 1: # if dropped
-            feedAction = 3 # stop
-            shootAction = 1 # shoot
-        
-
-        ### Priming sequence
-        if (shoot_switch == 1) and (f_drop_switch == 1): # if at shoot switch threshold
-            shootAction = 0 # stop shooting
-            feedAction = 1 # prime
-
-
     
 
         # if GPIO.input(L_IR_pin) == 0:
@@ -166,55 +152,55 @@ if __name__ == '__main__':
         # IR = [L_IR, M_IR, R_IR] # IR list
         # MODE = 1
         
-        #### below 
-        # if MODE == 0:
+       
+        if MODE == 0:
             
-        #     driveAction = 2 # rotate right
-        #     startTurn = now
+            driveAction = 2 # rotate right
+            startTurn = now
             
-        #     if startTurn - oldTurn > 5:
-        #         oldTurn = startTurn
-        #         MODE = 1
-        #     MODE = 1
-        #     # orient towards IR sensors
-        #     # move forward to shoot_y_dist
-        #     break
+            if startTurn - oldTurn > 5:
+                oldTurn = startTurn
+                MODE = 1
+            MODE = 1
+            # orient towards IR sensors
+            # move forward to shoot_y_dist
+            break
             
-        # elif MODE == 1:
-        #     # check for LMR IR sensors
-        #     if IR == 0: # if IR sensor detects something
-        #         # move forward
-        #         driveAction = 0
+        elif MODE == 1:
+            # check for LMR IR sensors
+            if IR == 0: # if IR sensor detects something
+                # move forward
+                driveAction = 0
                 
-        #         #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
-        #         if IR == [1,0,0] or IR == [1,1,0]:
-        #             print('ir detected on left')
-        #             sendX = leftGoal[0]
-        #             sendY = leftGoal[1]
-        #         elif IR == [0,1,0]:
-        #             print('ir detected center')
-        #             sendX = midGoal[0]
-        #             sendY = midGoal[1]
+                #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
+                if IR == [1,0,0] or IR == [1,1,0]:
+                    print('ir detected on left')
+                    sendX = leftGoal[0]
+                    sendY = leftGoal[1]
+                elif IR == [0,1,0]:
+                    print('ir detected center')
+                    sendX = midGoal[0]
+                    sendY = midGoal[1]
                     
-        #         elif IR == [0,1,1] or IR == [0,0,1]:
-        #             print('ir detected on right')
-        #             sendX = rightGoal[0]
-        #             sendY = rightGoal[1]
+                elif IR == [0,1,1] or IR == [0,0,1]:
+                    print('ir detected on right')
+                    sendX = rightGoal[0]
+                    sendY = rightGoal[1]
                     
-        #         ### execute driveAction
-        #         if (y_dist < sendY): 
-        #             driveAction = -1 # stop moving
+                ### execute driveAction
+                if (y_dist < sendY): 
+                    driveAction = -1 # stop moving
                 
-        #         elif (sendX - ultra_x_tol <= x_dist <= sendX + ultra_x_tol):
-        #             driveAction = 0 # forward
+                elif (sendX - ultra_x_tol <= x_dist <= sendX + ultra_x_tol):
+                    driveAction = 0 # forward
                 
-        #         elif (x_dist < sendX - ultra_x_tol):# center 75, left 20, right 130
-        #             driveAction = 1 # left
+                elif (x_dist < sendX - ultra_x_tol):# center 75, left 20, right 130
+                    driveAction = 1 # left
                 
-        #         elif (x_dist > sendX + ultra_x_tol): # center 90, left 32, right 140
-        #             driveAction = 2 # right
+                elif (x_dist > sendX + ultra_x_tol): # center 90, left 32, right 140
+                    driveAction = 2 # right
             
-        #         else:
-        #             driveAction = 0 # forward
-        #     else:
-        #         print('no IR')
+                else:
+                    driveAction = 0 # forward
+            else:
+                print('no IR')
