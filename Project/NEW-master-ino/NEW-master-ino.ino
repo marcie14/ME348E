@@ -51,9 +51,9 @@ int shooter_ENB = 7;
 ezButton shoot_switch(39); // limit switch (1 = ?)
 
 // variable initializations
-int driveAction;
-int shootAction;
-int feedAction;
+int driveAction = -1;
+int shootAction = -1;
+int feedAction = -1;
 // float x_dist; // ultrasonic
 // float y_dist; // ultrasonic
 float left; // ultrasonic
@@ -107,25 +107,25 @@ void loop() {
   back = back_sensor.measureDistanceCm();
 
   recvWithStartEndMarkers();
-//
-//  if (newData == true){  
-//    parseData();
-//    sendRecievedData();
-//    newData = false;
-//  }
-  sendRecievedData();
+
+  if (newData == true){  
+    parseData();
+    sendRecievedData();
+    commandMotors();
+    commandFeed();
+    commandShoot();
+    newData = false;
+  }
+//  sendRecievedData(); // DEBUG
 
  
-//  commandMotors();
-//  commandFeed();
-//  commandShoot();
-  // delay(100);
+
 
 
 
 //  testFeeder(); // DEBUG
 //  testShooter(); // DEBUG
-  testMotors(); // DEBUG
+//  testMotors(); // DEBUG
 }
 //====================================
 void recvWithStartEndMarkers() {
@@ -185,7 +185,7 @@ void sendRecievedData(){
   //  Serial.print(x_dist);
   //  Serial.print(',');
   //  Serial.println(y_dist);
-  Serial.print("Ultrasonic: "); // DEBUG
+//  Serial.print("Ultrasonic: "); // DEBUG
   Serial.print(left);
   Serial.print(',');
   Serial.print(right);
@@ -194,25 +194,21 @@ void sendRecievedData(){
   Serial.print(',');
   Serial.print(back);
   Serial.print(',');
-  Serial.print(" Feeder: "); // DEBUG
+//  Serial.print(" Feeder: "); // DEBUG
   Serial.print(f_prime_switch.getState());
   Serial.print(',');
   Serial.print(f_drop_switch.getState());
   Serial.print(',');
-
-  Serial.print(" Shooter: "); // DEBUG
-  Serial.print(',');
-  Serial.println(shoot_switch.isPressed());
-  Serial.print("Drive Action: "); // DEBUG
+//  Serial.print(" Shooter: "); // DEBUG
+  Serial.print(shoot_switch.getState());
+//  Serial.print("Drive Action: "); // DEBUG
   Serial.print(',');
   Serial.print(driveAction);
   Serial.print(',');
-  Serial.print("Feed Action"); // DEBUG
-  Serial.print(',');
+//  Serial.print("Feed Action"); // DEBUG
   Serial.print(feedAction); 
   Serial.print(',');
-  Serial.print("Shoot Action: "); // DEBUG
-  Serial.print(',');
+//  Serial.print("Shoot Action: "); // DEBUG
   Serial.println(shootAction);
 
 }
@@ -236,31 +232,25 @@ void commandMotors(){
       stopMoving();
       break;
   }
-
-  // if (y_dist < 41){
-  //   stopMoving();
-  // }
-  // else if (x_dist <130)
-  //   stopMoving();
 }
 
 void commandFeed(){
   switch (feedAction) {
-    case 0:
+    case 1:
       // prime
       if (f_prime_switch.getState() == 1){
-          feederDrop(); //DEBUG = testFeeder()
-//        feederStop(); //UNCOMMENT
+//          feederDrop(); //DEBUG = testFeeder()
+        feederStop(); //UNCOMMENT
       }
       else{
         feederPrime();
       }
       break;
-    case 1:
+    case 2:
       // release + drop puck
       if (f_drop_switch.getState() == 1){        
-        feederPrime();//DEBUG = testFeeder()
-//      feederStop(); //UNCOMMENT
+//        feederPrime();//DEBUG = testFeeder()
+        feederStop(); //UNCOMMENT
       }
       else{
         feederDrop();
@@ -295,13 +285,13 @@ void commandShoot(){
 // ========== Feeder Motor Function ==========
 void testFeeder() { //FOR DEBUG
   if (f_prime_switch.getState() == 1){
-    feedAction = 1;
+    feederDrop();
   }
   
   if (f_drop_switch.getState() == 1){
-    feedAction = 0; 
+    feederPrime();
   }
-  commandFeed();
+//  commandFeed();
   
 }
 void feederPrime(){

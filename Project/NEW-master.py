@@ -12,8 +12,8 @@ keyboard = Controller() # for debug
 
 '''##### initialize setup variables  #####'''
 ### serial communications
-# port = '/dev/ttyACMO' # RPi port for communicating to arduino board
-port = '/dev/cu.usbmodem2101' # marcie mac port
+port = '/dev/ttyACM0' # RPi port for communicating to arduino board
+# port = '/dev/cu.usbmodem2101' # marcie mac port
 
 
 '''##### initialize GPIO #####'''
@@ -60,14 +60,21 @@ leftGoal = (25, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
 midGoal = (83, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
 rightGoal = (135, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
 
+### Limit Switches
+f_prime_switch = -1
+f_drop_switch = -1
+shoot_switch = -1
+
 ### Game MODE variables
 MODE = 0 # for determining setup vs game mode
 
 ### serial communications variables
-driveAction = -1 #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
-feedAction = -1
-shootAction = -1
-String2Send='<'+str(driveAction)+',' + str(feedAction)+','+str(shootAction)+ '>'
+# rcvd_driveAction = -1 # received from arduino FOR DEBUG
+# rcvd_feedAction = -1 # received from arduino FOR DEBUG
+# rcvd_shootAction = -1 # received from arduino FOR DEBUG
+# driveAction = 0 #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
+# feedAction = 1
+# shootAction = 0
 
 
 
@@ -81,12 +88,13 @@ if __name__ == '__main__':
     ser.reset_output_buffer()
     
     
-    print('inif') # for debug
+    print('INITIALIZE FIRST MOVES') # for debug
     #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
     driveAction = input('driveAction: ') # for debug
-    feedAction = input('feedAction: ') # for debug
-    shootAction = input('shootAction: ') # for debug
-    
+    feedAction = input('feedAction: ') # for debug # 1 = prime, 2 = drop
+    shootAction = input('shootAction: ') # for debug # 0 = stop, 1 = shoot
+    String2Send='<'+str(driveAction)+','+str(sendX)+','+str(sendY)+','+ str(feedAction)+','+str(shootAction)+ '>'
+
     while True:
         ser.write(String2Send.encode('utf-8'))
         sendString(port,115200,'<'+str(driveAction)+','+str(sendX)+','+str(sendY)+','+ str(feedAction)+','+str(shootAction)+ '>',0.0001)
@@ -96,13 +104,28 @@ if __name__ == '__main__':
         try:
             line = ser.readline().decode('utf-8')  # read incoming string
             line=line.split(',') # split incoming string into list with comma delimeter
-            x_dist = float(line[0]) # distance x sensor detects from wall
-            y_dist = float(line[1]) # distance y sensor detects from wall
-            L_IR = GPIO.input(L_IR_pin)
-            M_IR = GPIO.input(M_IR_pin)
-            R_IR = GPIO.input(R_IR_pin)
-            print('x: '+ x_dist + ', y:' +  y_dist + ', LIR: ' + L_IR + ', MIR: ' + M_IR + ', RIR: ' + R_IR)
+            # print(line)
+            # x_dist = float(line[0]) # distance x sensor detects from wall
+            # y_dist = float(line[1]) # distance y sensor detects from wall
+            # L_IR = GPIO.input(L_IR_pin)
+            # M_IR = GPIO.input(M_IR_pin)
+            # R_IR = GPIO.input(R_IR_pin)
+        
+            left = float(line[0])
+            right = float(line[1])
+            front = float(line[2])
+            back = float(line[3])
+            f_prime_switch = int(line[4])
+            f_drop_switch = int(line[5])
+            shoot_switch = int(line[6])
+            rcvd_driveAction = int(line[7])
+            rcvd_feedAction = int(line[8])
+            rcvd_shootAction = int(line[9])
 
+            print('ultrasonics: ' + str(left) + ',' + str(right) +',' + str(front) + ',' + str(back))
+            print('limit switches: ' + str(f_prime_switch) + ',' + str(f_drop_switch) + ',' + str(shoot_switch))
+            print('recieved: ' + str(rcvd_driveAction) + ',' + str(rcvd_feedAction) + ',' + str(rcvd_shootAction))
+            time.sleep(0.5)
 
         except UnicodeDecodeError:
             print("Received invalid byte sequence. Skipping...")
@@ -110,6 +133,22 @@ if __name__ == '__main__':
             print("packet dropped")
             # GPIO.cleanup()
         
+        ### Shooting sequence
+        if f_prime_switch == 1: # if primed
+            feedAction = 2 # drop
+        if f_drop_switch == 1: # if dropped
+            feedAction = 3 # stop
+            shootAction = 1 # shoot
+        
+
+        ### Priming sequence
+        if (shoot_switch == 1) and (f_drop_switch == 1): # if at shoot switch threshold
+            shootAction = 0 # stop shooting
+            feedAction = 1 # prime
+
+
+    
+
         # if GPIO.input(L_IR_pin) == 0:
         #     L_IR = 0 # IR sensor detects something! (active low)
         # else:
@@ -123,9 +162,7 @@ if __name__ == '__main__':
         # else:
         #     R_IR = 1
 
-        # L_IR = random.randint(0,1)
-        # M_IR = random.randint(0,1)
-        # R_IR = random.randint(0,1)
+
         # IR = [L_IR, M_IR, R_IR] # IR list
         # MODE = 1
         
