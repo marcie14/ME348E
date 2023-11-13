@@ -412,7 +412,6 @@ void turnLeft(){
   // left bkwd
   digitalWrite(motor1pin1, LOW);
   digitalWrite(motor1pin2, HIGH);
-    
   // right fwd
   digitalWrite(motor2pin1, HIGH);
   digitalWrite(motor2pin2, LOW);
