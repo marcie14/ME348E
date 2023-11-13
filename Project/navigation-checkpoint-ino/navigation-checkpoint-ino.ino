@@ -1,3 +1,6 @@
+// gh token
+// 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
+
 #include <HCSR04.h>
 #include <ezButton.h>
 boolean newData = true;
