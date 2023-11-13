@@ -5,7 +5,7 @@ import serial       # for communicating with arduino
 import time         # for non-blocking code
 import numpy as np  # for calcs
 from sendStringScript import sendString # for communicating with arduino
-import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
+# import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
 import random # for randomizing actions
 from pynput.keyboard import Key, Controller # for debug
 keyboard = Controller() # for debug
@@ -13,8 +13,8 @@ keyboard = Controller() # for debug
 
 '''##### initialize setup variables  #####'''
 ### serial communications
-port = '/dev/ttyACM0' # RPi port for communicating to arduino board
-# port = '/dev/cu.usbmodem2101' # marcie mac port
+# port = '/dev/ttyACM0' # RPi port for communicating to arduino board
+port = '/dev/cu.usbmodem1101' # marcie mac port
 
 
 
@@ -24,10 +24,10 @@ port = '/dev/ttyACM0' # RPi port for communicating to arduino board
 L_IR_pin = 17
 M_IR_pin = 27
 R_IR_pin = 22
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(L_IR_pin, GPIO.IN)
-GPIO.setup(M_IR_pin, GPIO.IN)
-GPIO.setup(R_IR_pin, GPIO.IN)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setup(L_IR_pin, GPIO.IN)
+# GPIO.setup(M_IR_pin, GPIO.IN)
+# GPIO.setup(R_IR_pin, GPIO.IN)
 
 
 
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
 
    while True:
-       String2Send='<'+str(driveAction)+','+str(sendX)+','+str(sendY)+','+ str(feedAction)+','+str(shootAction)+ '>'
+       String2Send='<'+str(driveAction)+','+ str(feedAction)+','+str(shootAction)+ '>'
        ser.write(String2Send.encode('utf-8'))
        sendString(port,115200,String2Send,0.0001)
        now = time.time() # constantly reassign new timestamp
@@ -146,9 +146,9 @@ if __name__ == '__main__':
            # print(line)
            # x_dist = float(line[0]) # distance x sensor detects from wall
            # y_dist = float(line[1]) # distance y sensor detects from wall
-           L_IR = GPIO.input(L_IR_pin) # active low, 0 = detected
-           M_IR = GPIO.input(M_IR_pin) # active low, 0 = detected
-           R_IR = GPIO.input(R_IR_pin) # active low, 0 = detected
+        #    L_IR = GPIO.input(L_IR_pin) # active low, 0 = detected
+        #    M_IR = GPIO.input(M_IR_pin) # active low, 0 = detected
+        #    R_IR = GPIO.input(R_IR_pin) # active low, 0 = detected
       
            left = float(line[0])
            right = float(line[1])
@@ -176,19 +176,19 @@ if __name__ == '__main__':
            # GPIO.cleanup()
       
        ## shoot sequence
-       if f_prime_switch == 1: # if primed
-           feedAction = 2 # drop
-       if f_drop_switch == 1: # if dropped
-           feedAction = 0 # stop feeder
-           shootAction = 1 # shoot
+    #    if f_prime_switch == 1: # if primed
+    #        feedAction = 2 # drop
+    #    if f_drop_switch == 1: # if dropped
+    #        feedAction = 0 # stop feeder
+    #        shootAction = 1 # shoot
 
 
        ## prime sequence
-       if (shoot_switch == 1) and (f_drop_switch == 1): # if shoot switch pressed (at threshold)
-           shootAction = 0 # stop shoot
-           feedAction = 1 # prime
+    #    if (shoot_switch == 1) and (f_drop_switch == 1): # if shoot switch pressed (at threshold)
+    #        shootAction = 0 # stop shoot
+    #        feedAction = 1 # prime
 
-
+        
 
 
        #### below is commented out because the IR is not integrated yet
@@ -204,16 +204,17 @@ if __name__ == '__main__':
       
      
        if MODE == 0: # orient bot towards front
+           shootAction = 3
            if step == 0: # first step of MODE 0 - wall scan and detect squared position
               
                driveAction = 2 # rotate right
-               if (abs(now - prevTurn) > 0.5): # only run every 0.5 s
+               if (abs(now - prevTurn) > 0.01): # only run every 0.5 s
                    prevTurn = now
                    curr_diffX = [abs(left-right)] # difference between L and R ultrasonic
                    diffX = diffX + curr_diffX # add to list difference between L and R ultrasonic
-               if len(diffX) >= 25:
+               if len(diffX) >= 10:
                   
-                   driveAction = 4 # stop moving
+                   driveAction = 0 # stop moving
                    step = 1
           
            if step == 1: # second step of MODE 0 - set squared position, begin rotating back to squared position
@@ -235,9 +236,9 @@ if __name__ == '__main__':
                if (abs(now - old) > 0.5): # only run every 0.5 s
                    old = now
                    if (abs(front - sendY) > ultra_y_tol): # while the front sensor is not the same as the set Y distance (incl tolerance)
-                       driveAction = 0 # move straight
+                       driveAction = 4 # move straight
                    else:
-                       driveAction = 4 # stop moving
+                       driveAction = 0 # stop moving
                        MODE = 1
                        step = 0
                        print('done')

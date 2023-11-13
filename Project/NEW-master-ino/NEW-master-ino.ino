@@ -91,6 +91,9 @@ menu://applications/Development/arduino.desktop
 
   Serial.begin(115200);
   // Serial.println("<Arduino is ready>");
+  driveAction = 0;
+  shootAction = 0;
+  feedAction = 0;
 
 }   
 
@@ -116,6 +119,7 @@ void loop() {
     commandShoot();
     newData = false;
   }
+
 //  sendRecievedData(); // DEBUG
 
  
@@ -169,10 +173,6 @@ void parseData(){
 
   driveAction = atoi(strIndexer);
   strIndexer = strtok(NULL,",");
-  sendX = atoi(strIndexer);
-  strIndexer = strtok(NULL,",");
-  sendY = atoi(strIndexer);
-  strIndexer = strtok(NULL,",");
   feedAction = atoi(strIndexer);
   strIndexer = strtok(NULL,",");
   shootAction = atoi(strIndexer);
@@ -217,7 +217,7 @@ void sendRecievedData(){
 void commandMotors(){
   switch (driveAction) {
     case 0:
-      moveStraight();
+      stopMoving();
       break;
     case 1:
       turnLeft();
@@ -228,6 +228,8 @@ void commandMotors(){
     case 3:
       moveBackwards();
       break;
+    case 4:
+      moveStraight();
     default:
       stopMoving();
       break;
@@ -362,8 +364,8 @@ void testMotors(){ // DEBUG
 
 
 void moveStraight(){
-  analogWrite(L_ENA, 150); //ENA   pin
-  analogWrite(R_ENB, 150); //ENB pin
+  analogWrite(L_ENA, 100); //ENA   pin
+  analogWrite(R_ENB, 100); //ENB pin
   
   // left fwd
   digitalWrite(motor1pin1, HIGH);
@@ -376,8 +378,8 @@ void moveStraight(){
 }
 
 void moveBackwards(){
-  analogWrite(L_ENA, 150); //ENA   pin
-  analogWrite(R_ENB, 150); //ENB pin
+  analogWrite(L_ENA, 100); //ENA   pin
+  analogWrite(R_ENB, 100); //ENB pin
   
   // left bkwd
   digitalWrite(motor1pin1, LOW);
@@ -390,8 +392,8 @@ void moveBackwards(){
 }
 
 void turnRight(){
-  analogWrite(L_ENA, 150); //ENA   pin
-  analogWrite(R_ENB, 150); //ENB pin
+  analogWrite(L_ENA, 100); //ENA   pin
+  analogWrite(R_ENB, 100); //ENB pin
 
 
   // left fwd
@@ -404,8 +406,8 @@ void turnRight(){
 }
 
 void turnLeft(){
-  analogWrite(L_ENA, 150); //ENA   pin
-  analogWrite(R_ENB, 150); //ENB pin
+  analogWrite(L_ENA, 100); //ENA   pin
+  analogWrite(R_ENB, 100); //ENB pin
 
   // left bkwd
   digitalWrite(motor1pin1, LOW);
