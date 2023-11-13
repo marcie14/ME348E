@@ -35,7 +35,7 @@ int motor1pin2 = 9; // left
 int motor2pin1 = 10; // right
 int motor2pin2 = 11; // right
 int L_ENA = 12;
-int R_ENB =13;
+int R_ENB = 13;
 
 // feeder
 int feederpin1 = 2;
@@ -274,7 +274,6 @@ void commandShoot(){
       }
       break;
     case 1:
-    sh
       shooterOn();
       break;
     default:
@@ -450,4 +449,3 @@ void stopMoving(){
 // function for stepper motors for feeder (PI?)
 
 // function for 2 shooter motors
-

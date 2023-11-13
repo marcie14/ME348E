@@ -239,6 +239,7 @@ if __name__ == '__main__':
                    else:
                        driveAction = 4 # stop moving
                        MODE = 1
+                       step = 0
                        print('done')
                        break
           
