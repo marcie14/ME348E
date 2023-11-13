@@ -159,14 +159,14 @@ if __name__ == '__main__':
         if f_drop_switch == 1: # if dropped
             feedAction = 0 # stop feeder
             shootAction = 1 # shoot
-            
+
         ## prime sequence
         if (shoot_switch == 1) and (f_drop_switch == 1): # if shoot switch pressed (at threshold)
             shootAction = 0 # stop shoot
             feedAction = 1 # prime
 
 
-
+        #### below is commented out because the IR is not integrated yet
         # if GPIO.input(L_IR_pin) == 0:
         #     L_IR = 0 # IR sensor detects something! (active low)
         # else:
