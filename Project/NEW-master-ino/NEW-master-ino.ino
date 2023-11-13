@@ -17,10 +17,10 @@ const byte left_trig = 22;
 const byte left_echo = 24;
 const byte right_trig = 26;
 const byte right_echo = 28;
-const byte front_trig = 14; ///////////// FIX
-const byte front_echo = 15; ///////////// FIX
-const byte back_trig = 16; ///////////// FIX
-const byte back_echo = 17; ///////////// FIX
+const byte front_trig = 30; 
+const byte front_echo = 32; 
+const byte back_trig = 34; 
+const byte back_echo = 36; 
 
 // UltraSonicDistanceSensor X_sensor(x_trig_pin, x_echo_pin);
 // UltraSonicDistanceSensor Y_sensor(y_trig_pin, y_echo_pin);
@@ -48,7 +48,7 @@ ezButton f_drop_switch(51); // limit switch (1 = dropped)
 int shooterpin1 = 4;
 int shooterpin2 = 5;
 int shooter_ENB = 7;
-ezButton shoot_switch(39); // limit switch (1 = ?)
+ezButton shoot_switch(49); // limit switch (1 = ?)
 
 // variable initializations
 int driveAction = -1;
@@ -265,9 +265,16 @@ void commandFeed(){
 void commandShoot(){
   switch (shootAction) {
     case 0:
-      shooterStop();
+    // prime
+      if (shoot_switch.getState() == 0){
+        shooterOn();
+      }
+      else{
+        shooterStop();
+      }
       break;
     case 1:
+    sh
       shooterOn();
       break;
     default:
@@ -322,7 +329,7 @@ void testShooter(){ // FOR DEBUG
 }
 
 void shooterOn(){
-  analogWrite(shooter_ENB, 150); //ENA   pin
+  analogWrite(shooter_ENB, 250); //ENA   pin
   // fwd
   digitalWrite(shooterpin1, HIGH);
   digitalWrite(shooterpin2, LOW);
@@ -443,3 +450,4 @@ void stopMoving(){
 // function for stepper motors for feeder (PI?)
 
 // function for 2 shooter motors
+
