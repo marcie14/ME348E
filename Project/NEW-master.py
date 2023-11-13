@@ -5,7 +5,7 @@ import serial       # for communicating with arduino
 import time         # for non-blocking code
 import numpy as np  # for calcs
 from sendStringScript import sendString # for communicating with arduino
-# import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
+import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
 import random # for randomizing actions
 from pynput.keyboard import Key, Controller # for debug
 keyboard = Controller() # for debug
@@ -13,9 +13,9 @@ keyboard = Controller() # for debug
 
 '''##### initialize setup variables  #####'''
 ### serial communications
-# port = '/dev/ttyACM0' # RPi port for communicating to arduino board
+port = '/dev/ttyACM0' # RPi port for communicating to arduino board
 # port = '/dev/cu.usbmodem142101' # brycen mac port
-port = '/dev/cu.usbmodem21101' # marcie mac port
+# port = '/dev/cu.usbmodem21101' # marcie mac port
 
 
 
@@ -25,10 +25,13 @@ port = '/dev/cu.usbmodem21101' # marcie mac port
 L_IR_pin = 17
 M_IR_pin = 27
 R_IR_pin = 22
-# GPIO.setmode(GPIO.BCM)
-# GPIO.setup(L_IR_pin, GPIO.IN)
-# GPIO.setup(M_IR_pin, GPIO.IN)
-# GPIO.setup(R_IR_pin, GPIO.IN)
+# L_IR_pin = 11
+# M_IR_pin = 13
+# R_IR_pin = 15
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(L_IR_pin, GPIO.IN)
+GPIO.setup(M_IR_pin, GPIO.IN)
+GPIO.setup(R_IR_pin, GPIO.IN)
 
 
 
@@ -151,9 +154,9 @@ if __name__ == '__main__':
 			# print(line)
 			# x_dist = float(line[0]) # distance x sensor detects from wall
 			# y_dist = float(line[1]) # distance y sensor detects from wall
-			# L_IR = GPIO.input(L_IR_pin) # active low, 0 = detected ## uncomment for MA
-			# M_IR = GPIO.input(M_IR_pin) # active low, 0 = detected
-			# R_IR = GPIO.input(R_IR_pin) # active low, 0 = detected
+			L_IR = GPIO.input(L_IR_pin) # active low, 0 = detected ## uncomment for MA
+			M_IR = GPIO.input(M_IR_pin) # active low, 0 = detected
+			R_IR = GPIO.input(R_IR_pin) # active low, 0 = detected
 		
 			left = float(line[0])
 			right = float(line[1])
@@ -168,7 +171,7 @@ if __name__ == '__main__':
 
 			# print values from 
 			print('ultrasonics: ' + str(left) + ',' + str(right) +',' + str(front) + ',' + str(back))
-			#print('IR: ' + str(L_IR) + ',' + str(M_IR) +',' + str(R_IR))
+			print('IR: ' + str(L_IR) + ',' + str(M_IR) +',' + str(R_IR))
 			#print('limit switches: ' + str(f_prime_switch) + ',' + str(f_drop_switch) + ',' + str(shoot_switch))
 			print('recieved: dr ' + str(rcvd_driveAction) + ', fe ' + str(rcvd_feedAction) + ', sh ' + str(rcvd_shootAction))
 			time.sleep(0.5)
@@ -178,7 +181,7 @@ if __name__ == '__main__':
 			print("Received invalid byte sequence. Skipping...")
 		except:
 			print("packet dropped")
-			# GPIO.cleanup()
+			GPIO.cleanup()
 		
 		# # shoot sequence
 		# if f_prime_switch == 1: # if primed
@@ -245,17 +248,17 @@ if __name__ == '__main__':
 			if step == 0:
 				driveAction = 4 # move forward
 				if (abs(front - tempFront) >= 5):
-					print('1')
+					# print('1')
 					driveAction = 0 # stop moving
 					if (abs(left-right) >= int_diffX + ultra_x_tol): # difference between left and right ultrasonic exceed the allowable tolerance
 						driveAction = 0
 						step = 1
-						print('2')
+						# print('2')
 					if (abs(front - shoot_y_dist) <= ultra_y_tol): # ront ultrasonic reaches predefined distance form front wall
 						driveAction = 0 # stop moving
 						MODE = 1
 						step = 0
-						print('3')
+						# print('3')
 				
 					
             
@@ -264,7 +267,7 @@ if __name__ == '__main__':
 			if step == 1: # first step of MODE 0 - wall scan and detect squared position
 				curr_diffX = abs(left-right)
 				driveAction = 4
-				print("sq")
+				# print("sq")
 				if(abs(curr_diffX - int_diffX) > ultra_x_tol):
 					step = 2
 				elif((front - sendY) < ultra_y_tol):

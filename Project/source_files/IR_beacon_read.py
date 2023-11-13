@@ -4,7 +4,7 @@ import time
 import numpy as np
 import RPi.GPIO as GPIO
 
-sensor = 17
+sensor = 27
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(sensor,GPIO.IN)
