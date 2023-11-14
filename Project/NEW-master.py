@@ -60,8 +60,8 @@ front = -1 # distance front sensor detects from wall
 back = -1 # distance back sensor detects from wall
 sendX = 83 # cm to send to arduino
 sendY = 41 # cm to send to arduino
-ultra_x_tol = 10   # (cm) ultrasonic sensor tolerance (x direction)
-ultra_y_tol = 3    # (cm) ultrasonic sensor tolerance (y direction)
+ultra_x_tol = 40   # (cm) ultrasonic sensor tolerance (x direction)
+ultra_y_tol = 25    # (cm) ultrasonic sensor tolerance (y direction)
 diffX = []
 single_DiffX = -1
 diffY = []
@@ -70,6 +70,7 @@ frontWall = -1
 left_position = -1
 turnLeft = False
 latch = 0
+startY = 0
 ## GOAL LOCATIONS ##
 shoot_y_dist = 41 # cm
 leftGoal = (25, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
@@ -90,7 +91,7 @@ step = 0 # further increments each mode
 # rcvd_driveAction = -1 # received from arduino FOR DEBUG
 # rcvd_feedAction = -1 # received from arduino FOR DEBUG
 # rcvd_shootAction = -1 # received from arduino FOR DEBUG
-driveAction = 4 #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
+driveAction = 0 #  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
 feedAction = 0
 shootAction = 0
 
@@ -117,7 +118,7 @@ shootAction = 0
 #         currentX = currentX + 0.5*(vR + vL)*cos(currentTheta)*dt
 #         currentY = currentY + 0.5*(vR + vL)*sin(currentTheta)*dt
 
-
+step = 0
   
 
 
@@ -172,9 +173,9 @@ if __name__ == '__main__':
 			# print values from 
 			print('ultrasonics: ' + str(left) + ',' + str(right) +',' + str(front) + ',' + str(back))
 			print('IR: ' + str(L_IR) + ',' + str(M_IR) +',' + str(R_IR))
-			#print('limit switches: ' + str(f_prime_switch) + ',' + str(f_drop_switch) + ',' + str(shoot_switch))
+			print('limit switches: ' + str(f_prime_switch) + ',' + str(f_drop_switch) + ',' + str(shoot_switch))
 			print('recieved: dr ' + str(rcvd_driveAction) + ', fe ' + str(rcvd_feedAction) + ', sh ' + str(rcvd_shootAction))
-			time.sleep(0.5)
+			# time.sleep(0.5)
 
 
 		except UnicodeDecodeError:
@@ -183,6 +184,32 @@ if __name__ == '__main__':
 			print("packet dropped")
 			GPIO.cleanup()
 		
+		
+		if (shoot_switch == 1):
+			shootAction = 0
+			# time.sleep(1)
+			if (f_prime_switch == 1):
+				feedAction = 2
+				
+				step = 1
+			elif (f_drop_switch == 1):
+				feedAction = 1
+				shootAction = 1
+				
+				step = 0
+			elif ((f_drop_switch == 0) and (f_prime_switch == 0)):
+				if step == 0:
+					feedAction = 1
+					
+				else:
+					feedAction = 2
+					
+
+		else:
+			shootAction = 1
+			step = 0
+		
+		''' OLD START'''
 		# # shoot sequence
 		# if f_prime_switch == 1: # if primed
 		# 	feedAction = 2 # drop
@@ -195,7 +222,7 @@ if __name__ == '__main__':
 		# if (shoot_switch == 1) and (f_drop_switch == 1): # if shoot switch pressed (at threshold)
 		# 	shootAction = 0 # stop shoot
 		# 	feedAction = 1 # prime
-
+		'''OLD END'''
         
 
 
@@ -211,128 +238,152 @@ if __name__ == '__main__':
        
       
      
-		if MODE == 0: # orient bot towards front
-			shootAction = 3
-			int_diffX = abs(left-right)
-			try:
-				if (front/back) > 5 and latch == 0:
-					latch = 1
-					step = 0
-					tempFront = front
-					print('this')
+	# 	if MODE == 0: # orient bot towards front
+	# 		#driveAction = 4
+	# 		shootAction = 3
+	# 		int_diffX = abs(left-right)
+	# 		try:
+	# 			if (front/back) > 5 and latch == 0:
+	# 				latch = 1
+	# 				step = 1
+	# 				tempFront = front
+	# 				print('forward')
+	# 			elif(back/front) > 4 and latch == 0:
+	# 				latch = 1
+	# 				step = 0
+	# 				startY = front
+	# 				print('Backward')
+	# 			elif( latch == 0):
+	# 				step = 2
+	# 				latch = 1
+	# 				lunch = 0
+	# 		except:
+	# 			print("error: packet dropped, divide by zero")
+				
+	# 			"""
+	# 			1. Check if front ultrasonic is ~5x the reading as the back ultrasonic
+	# 				If True, continue to step 2
+	# 				If False, skip to step 3b
+
+	# 			2. Drive forward and check that the difference between left and right ultrasonic stays roughly the same within some given tolerance. Continue driving forward until one of two conditions are met:
+	# 				a) Front ultrasonic reaches predefined distance form front wall
+	# 				b) Difference between left and right ultrasonic exceed the allowable tolerance
+
+	# 			3.
+	# 			If a) begin IR search and shooting
+	# 			If b) begin sweeping, rotating in the direction (left/ccw or right/cw) with the larger ultrasonic reading
+
+	# 			"""
+	# 		if step == -1: # DEBUG allows previous drive actions to send through loop before ending program 
+	# 			break #### REMOVE FOR FINAL VERSION ####
+            
+            
+	# 		if step == 0:
+	# 			print('step 0')
+	# 			driveAction = 2 # turn
+			
+	# 			if (abs(left-right) <= int_diffX) and (front > 3*startY): # difference between left and right ultrasonic exceed the allowable tolerance
+	# 				driveAction = 0
+	# 				step = 1
+	# 				print("0 end: ",abs(left-right))
+	# 			# elif ((front - shoot_y_dist) <= ultra_y_tol): # ront ultrasonic reaches predefined distance form front wall
+	# 			# 	driveAction = 0 # stop moving
+	# 			# 	MODE = 1
+	# 			# 	step = 0
+	# 			# 	print('3')
+				
 					
-				elif( latch == 0):
-					step = 2
-					latch = 1
-			except:
-				print("error: packet dropped, divide by zero")
-				
-				"""
-				1. Check if front ultrasonic is ~5x the reading as the back ultrasonic
-					If True, continue to step 2
-					If False, skip to step 3b
-
-				2. Drive forward and check that the difference between left and right ultrasonic stays roughly the same within some given tolerance. Continue driving forward until one of two conditions are met:
-					a) Front ultrasonic reaches predefined distance form front wall
-					b) Difference between left and right ultrasonic exceed the allowable tolerance
-
-				3.
-				If a) begin IR search and shooting
-				If b) begin sweeping, rotating in the direction (left/ccw or right/cw) with the larger ultrasonic reading
-
-				"""
-			if step == -1: # DEBUG allows previous drive actions to send through loop before ending program 
-				break #### REMOVE FOR FINAL VERSION ####
-            
-            
-			if step == 0:
-				driveAction = 4 # move forward
-				if (abs(front - tempFront) >= 5):
-					# print('1')
-					driveAction = 0 # stop moving
-					if (abs(left-right) >= int_diffX + ultra_x_tol): # difference between left and right ultrasonic exceed the allowable tolerance
-						driveAction = 0
-						step = 1
-						# print('2')
-					if (abs(front - shoot_y_dist) <= ultra_y_tol): # ront ultrasonic reaches predefined distance form front wall
-						driveAction = 0 # stop moving
-						MODE = 1
-						step = 0
-						# print('3')
-				
-					
-            
-				
 	
-			if step == 1: # first step of MODE 0 - wall scan and detect squared position
-				curr_diffX = abs(left-right)
-				driveAction = 4
-				# print("sq")
-				if(abs(curr_diffX - int_diffX) > ultra_x_tol):
-					step = 2
-				elif((front - sendY) < ultra_y_tol):
-					driveAction = 0 # stop moving
-					# MODE = 1 # uncomment for final
-					step = 0
-					print('done - step 1')
-					step = -1 # DEBUG end program
-					break
-
-			if step == 2: # second step of MODE 0 - begin rotating to find squared position
-				# driveAction = 2
-				if(right > left):
-					driveAction = 2 # rotate right
-				else:
-					driveAction = 1
-					turnLeft = True
-				if (abs(now - prevTurn) > 0.01): # only run every __ s
-					prevTurn = now
-					# print("main")
-					curr_diffX = [abs(left-right)] # difference between L and R ultrasonic
-					diffX = diffX + curr_diffX # add to list difference between L and R ultrasonic
-					squareX = min(diffX)
-					curr_diffY = [front - back] # difference between L and R ultrasonic
-					diffY = diffY + curr_diffY # add to list difference between L and R ultrasonic
-					squareY = max(diffY)
-				if (curr_diffX[0] > squareX + ultra_x_tol) and (curr_diffY[0] < squareY - ultra_y_tol):
+	# 		if step == 1: # first step of MODE 0 - wall scan and detect squared position
+	# 			print('step 1')
+	# 			curr_diffX = abs(left-right)
+	# 			driveAction = 3
+	# 			# print("sq")
+	# 			if(abs(curr_diffX) > ultra_x_tol):
+	# 				step = 2
+	# 				print("1 end: ",curr_diffX)
+	# 				lunch = 0
+	# 			elif ((front - sendY) < 5): # changed from ultra_y_tol
+	# 				driveAction = 0 # stop moving
+	# 				# MODE = 1 # uncomment for final
+	# 				#step = 0
+	# 				print('done - step 1')
+	# 				step = -1 # DEBUG end program
 					
-					driveAction = 0 # stop moving
-					step = 3
+
+	# 		if step == 2: # second step of MODE 0 - begin rotating to find squared position
+	# 			print('step 2')
+	# 			# driveAction = 2
+	# 			if lunch == 0:
+	# 				if(right > left):
+	# 					driveAction = 2 # rotate right
+	# 					lunch = 1
+	# 				else:
+	# 					driveAction = 1
+	# 					turnLeft = True
+	# 					lunch = 1
+	# 			# if (abs(now - prevTurn) > 0.01): # only run every __ s
+	# 			# 	prevTurn = now
+	# 			print("main")
+	# 			curr_diffX = [abs(left-right)] # difference between L and R ultrasonic
+	# 			diffX = diffX + curr_diffX # add to list difference between L and R ultrasonic
+	# 			squareX = min(diffX)
+	# 			curr_diffY = [front - back] # difference between L and R ultrasonic
+	# 			diffY = diffY + curr_diffY # add to list difference between L and R ultrasonic
+	# 			squareY = max(diffY)
+	# 			if (curr_diffX[0] > squareX + ultra_x_tol): #or (curr_diffY[0] < squareY - ultra_y_tol):
+					
+	# 				print('------------------------------------------------------------------------------------------------------------------------------------')
+	# 				driveAction = 0 # stop moving
+	# 				step = 3
 		
-		if step == 3: # third step of MODE 0 - set squared position, begin rotating back to squared position
-			if(turnLeft):
-				driveAction = 2
-			else:
-				driveAction = 1 # rotate left
-			step = 4
+	# 		if step == 3: # third step of MODE 0 - set squared position, begin rotating back to squared position
+	# 			print('step 3')
+	# 			curr_diffX = [abs(left-right)] # difference between L and R ultrasonic
+	# 			if(turnLeft):
+	# 				driveAction = 2 #int_diffX
+	# 				print('turned right')
+	# 				if ((curr_diffX[0] > squareX + ultra_x_tol) and (front > 50)): #or (curr_diffY[0] < squareY - ultra_y_tol):
+	# 					# print('------------------------------------------------------------------------------------------------------------------------------------')
+	# 					driveAction = 0 # stop moving
+	# 					print('x squared - stop')
+	# 			else:
+	# 				driveAction = 1 # rotate left
+	# 				print('turned left')
+				
+				
+	# 			step = -1 
 
 
-		if step == 4: # fourth step of MODE 0 - stop moving once returned to squared position
-			#if (abs(now - prevTurn) > 0.5): # only run every 0.5 s
-				#   prevTurn = now
-			single_DiffX = abs(left-right)
-			single_diffY = abs(front - back)
-			if (abs(single_DiffX - squareX) < ultra_x_tol) or ((single_DiffY - squareY) < ultra_y_tol): # if we are back to the point where diffX is at min (incl tolerance)
-				driveAction = 0 # stop moving
-				step = 5
+	# 		if step == 4: # fourth step of MODE 0 - stop moving once returned to squared position
+	# 			#if (abs(now - prevTurn) > 0.5): # only run every 0.5 s
+	# 				#   prevTurn = now
+	# 			print('step 4')
+	# 			single_DiffX = abs(left-right)
+	# 			single_diffY = abs(front - back)
+	# 			if (abs(single_DiffX - squareX) < ultra_x_tol):# or ((single_DiffY - squareY) < ultra_y_tol): # if we are back to the point where diffX is at min (incl tolerance)
+	# 				driveAction = 0 # stop moving
+	# 				step = 5
 
 
-		if step == 5: # fifth step of MODE 0 -  move forward until reach set y distance
-			#if (abs(now - old) > 0.5): # only run every 0.5 s
-				#   old = now
-			if (abs(front - sendY) < ultra_y_tol): # while the front sensor is not the same as the set Y distance (incl tolerance)
-				driveAction = 4 # move straight
-			else:
-				driveAction = 0 # stop moving
-				# MODE = 1 # uncomment for final
-				step = 0
-				print('done - step 5') ## debug - remove for final version
-				step = -1 # DEBUG end program
-				## debug - remove for final version
+	# 		if step == 5: # fifth step of MODE 0 -  move forward until reach set y distance
+	# 			#if (abs(now - old) > 0.5): # only run every 0.5 s
+	# 				#   old = now
+	# 			print('step 5')
+	# 			if (front > 20): # while the front sensor is not the same as the set Y distance (incl tolerance)
+	# 				driveAction = 3 # move straight
+	# 			else:
+	# 				driveAction = 0 # stop moving
+	# 				# MODE = 1 # uncomment for final
+	# 				step = 1
+	# 				print('done - step 5') ## debug - remove for final version
+	# 				#step = -1 # DEBUG end program
+	# 				## debug - remove for final version
 		
   
-    #### below is commented out because the IR is not integrated yet
-	# elif MODE == 1: # roll across shoot distance, scan IR
+    # #### below is commented out because the IR is not integrated yet
+	# 	elif MODE == 1: # roll across shoot distance, scan IR
+	# 		driveAction = 1
 	#     # check for LMR IR sensors
 	#     if IR == 0: # if IR sensor detects something
 	#         # move forward

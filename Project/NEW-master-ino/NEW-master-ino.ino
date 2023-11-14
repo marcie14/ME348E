@@ -364,7 +364,7 @@ void testMotors(){ // DEBUG
 
 
 void moveStraight(){
-  analogWrite(L_ENA, 100); //ENA   pin
+  analogWrite(L_ENA, 65); //ENA   pin
   analogWrite(R_ENB, 100); //ENB pin
   
   // left fwd
@@ -378,16 +378,16 @@ void moveStraight(){
 }
 
 void moveBackwards(){
-  analogWrite(L_ENA, 100); //ENA   pin
+  analogWrite(L_ENA, 65); //ENA   pin
   analogWrite(R_ENB, 100); //ENB pin
   
   // left bkwd
-  digitalWrite(motor1pin1, LOW);
-  digitalWrite(motor1pin2, HIGH);
+  digitalWrite(motor1pin1, HIGH);
+  digitalWrite(motor1pin2, LOW);
 
   // right bkwd 
-  digitalWrite(motor2pin1, LOW);
-  digitalWrite(motor2pin2, HIGH);
+  digitalWrite(motor2pin1, HIGH);
+  digitalWrite(motor2pin2, LOW);
 
 }
 
