@@ -1,4 +1,17 @@
 #### V2
+
+'''
+status update:
+- drives forward if placed forward, in middle of field (95% confidence...)
+- IR circuit is operational
+- some skeleton code for rando orientation, not working well...
+
+To do:
+- need to figure out placed in rando orientation**************************
+- need to integrate IR (pivot in place to aim at IR)***********************
+- finish integrating shooter/feeder stuff
+- drive forward function for after puck fed
+'''
        
 '''##### import required libraries #####'''
 import serial       # for communicating with arduino
