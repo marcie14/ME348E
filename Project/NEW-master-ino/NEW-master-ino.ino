@@ -120,7 +120,7 @@ void loop() {
     newData = false;
   }
 
-//  sendRecievedData(); // DEBUG
+//  sendRecievedData(); // /DEB/UG
 
  
 
@@ -128,7 +128,7 @@ void loop() {
 
 
 //  testFeeder(); // DEBUG
-//  testShooter(); // DEBUG
+//  testShooter(); // DEBU/G
 //  testMotors(); // DEBUG
 }
 //====================================
