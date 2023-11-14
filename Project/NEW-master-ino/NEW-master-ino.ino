@@ -38,17 +38,17 @@ int L_ENA = 12;
 int R_ENB = 13;
 
 // feeder
-int feederpin1 = 2;
+int feederpin1 = 2; // PWM
 int feederpin2 = 3;
-int feeder_ENA = 6;
+int feeder_ENA = 6; // PWM
 ezButton f_prime_switch(53); // limit switch (1 = primed)
 ezButton f_drop_switch(51); // limit switch (1 = dropped)
 
 // shooter 
-int shooterpin1 = 4;
-int shooterpin2 = 5;
-int shooter_ENB = 7;
-ezButton shoot_switch(49); // limit switch (1 = ?)
+int shooterpin1 = 4; //PWM
+int shooterpin2 = 7; // not PWM
+int shooter_ENB = 5; // PWM
+ezButton shoot_switch(49); // limit switch (1 = stop)
 
 // variable initializations
 int driveAction = -1;
@@ -226,10 +226,11 @@ void commandMotors(){
       turnRight();
       break;
     case 3:
-      moveBackwards();
+      moveStraight();
       break;
     case 4:
-      moveStraight();
+      moveBackwards();
+      break;
     default:
       stopMoving();
       break;
@@ -267,15 +268,11 @@ void commandFeed(){
 void commandShoot(){
   switch (shootAction) {
     case 0:
-    // prime
-      if (shoot_switch.getState() == 0){
-        shooterOn();
-      }
-      else{
-        shooterStop();
-      }
+      // shooter off
+      shooterStop();
       break;
     case 1:
+    // shooter on
       shooterOn();
       break;
     default:
@@ -325,8 +322,18 @@ void feederStop(){
 }
 // ========== Shooter Motor Function ==========
 void testShooter(){ // FOR DEBUG
-  shootAction = 1;
-  commandShoot();
+  if (shoot_switch.getState() == 1){ // if switch has been pressed
+    shootAction = 0; // stop shoot
+    commandShoot();
+    delay(1000);   // wait
+    shootAction = 1; // shoot again
+    commandShoot();
+  }
+  else {
+    shootAction = 1; // shoot
+    commandShoot();
+
+  }
 }
 
 void shooterOn(){
@@ -334,6 +341,12 @@ void shooterOn(){
   // fwd
   digitalWrite(shooterpin1, HIGH);
   digitalWrite(shooterpin2, LOW);
+}
+void shooterReverse(){
+  analogWrite(shooter_ENB, 250); //ENA   pin
+  // fwd
+  digitalWrite(shooterpin1, LOW);
+  digitalWrite(shooterpin2, HIGH);
 }
 void shooterStop(){
   analogWrite(shooter_ENB, 0); //ENA   pin
@@ -382,12 +395,12 @@ void moveBackwards(){
   analogWrite(R_ENB, 100); //ENB pin
   
   // left bkwd
-  digitalWrite(motor1pin1, HIGH);
-  digitalWrite(motor1pin2, LOW);
+  digitalWrite(motor1pin1, LOW);
+  digitalWrite(motor1pin2, HIGH);
 
   // right bkwd 
-  digitalWrite(motor2pin1, HIGH);
-  digitalWrite(motor2pin2, LOW);
+  digitalWrite(motor2pin1, LOW);
+  digitalWrite(motor2pin2, HIGH);
 
 }
 
