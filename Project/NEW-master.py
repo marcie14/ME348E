@@ -256,11 +256,12 @@ if __name__ == '__main__':
 				print('step 1')
 				curr_diffX = abs(left-right)
 				driveAction = 3
+				#print(front-sendY) < 5
 				if(abs(curr_diffX) > ultra_x_tol):
 					step = 2
 					print("1 end: ",curr_diffX)
 					lunch = 0
-				elif ((front - sendY) < 5): # changed from ultra_y_tol
+				elif ((front) < 20): # changed from ultra_y_tol
 					driveAction = 0 # stop moving
 					# MODE = 1 # uncomment for final
 					#step = 0
