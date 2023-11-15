@@ -28,7 +28,7 @@ keyboard = Controller() # for debug
 
 '''##### initialize setup variables  #####'''
 ### serial communications
-port = '/dev/ttyACM1' # RPi port for communicating to arduino board
+port = '/dev/ttyACM0' # RPi port for communicating to arduino board
 # port = '/dev/cu.usbmodem142101' # brycen mac port
 # port = '/dev/cu.usbmodem21101' # marcie mac port
 
@@ -215,9 +215,9 @@ if __name__ == '__main__':
 
 
 		print('MODE = ' + str(MODE)) # debug for below
-		print('step = ' + str(step) + '\n\n') # debug for below
+		print('step = ' + str(step)) # debug for below
 		print('mini_step = ' + str(mini_step))
-		print('mini_sub_step = ' + str(mini_sub_step))
+		print('mini_sub_step = ' + str(mini_sub_step) + '\n\n')
 
 
 		# if MODE == -3: # TEST COSINE FUNCTION FOR MODE 1
@@ -440,7 +440,7 @@ if __name__ == '__main__':
 					print('cos: ' + str(cos))
 					if len(avg_cos) >= 5:
 						avg_cos.pop(0)
-					if (IR == 0) or (np.average(avg_cos) > 1.04):
+					if ((IR == 0)  or (np.average(avg_cos) > 1.04)):
 						print('has turned 30-60 deg')
 						driveAction = 0
 						mini_step = 2
@@ -448,15 +448,18 @@ if __name__ == '__main__':
 					print("detecting IR")
 					curr_IR = [IR]
 					recent_IR = recent_IR + curr_IR
-					if len(recent_IR) >= 20:
+					if len(recent_IR) >= 30:
 						recent_IR.pop(0) # remove first IR
+						# print(len(recent_IR))
 						
-					if np.average(recent_IR) < 0.5:
+					if np.average(recent_IR) < 0.6:
 						print("IR detected")
 						# prime, shoot
 						driveAction = 0
 					else:
-						if len(avg_cos) > 20:
+						# print('else')
+						if len(recent_IR) >= 29:
+							print('prep step 2')
 							step = 2 # NO IR, SEARCH MIDDLE AGAIN
 							mini_step = 0
 							avg_cos = []
@@ -470,16 +473,17 @@ if __name__ == '__main__':
 					mini_step = 1
 				elif mini_step == 1:
 					print('turning left')
-					cos = [math.cos(l1 / left)]
+					cos = [math.cos(r1 / right)]
 					avg_cos = avg_cos + cos # get degrees has turned
-					print('l1: ' + str(l1))
+					print('r1: ' + str(r1))
 					print('cos: ' + str(cos))
 					if len(avg_cos) >= 5:
 						avg_cos.pop(0)
-					if (abs(np.average(avg_cos) < 0.1)): 
-						print('has turned 30-60 deg')
+					if ((abs(np.average(avg_cos) < 0.56)) and (abs(np.average(avg_cos) > 0.56))): 
+						print('has returned to front')
 						driveAction = 0
-						mini_step = 2
+						# mini_step = 2
+						MODE = -2
 				elif mini_step == 2:
 					## re-calibrate avg right and left when "square"
 					avg_right = avg_right + [right] # get average of right sensor
@@ -490,7 +494,7 @@ if __name__ == '__main__':
 					print("detecting IR")
 					curr_IR = [IR]
 					recent_IR = recent_IR + curr_IR
-					if len(recent_IR) >= 10:
+					if len(recent_IR) >= 5:
 						recent_IR.pop(0) # remove first IR
 						
 					if np.average(recent_IR) < 0.5:
@@ -499,7 +503,7 @@ if __name__ == '__main__':
 						driveAction = 0
 						# MODE = -2
 					else:
-						if len(avg_right) > 20:
+						if len(recent_IR) > 20:
 							step = 3 # NO IR, SEARCH MIDDLE, RESTART LOOP
 							mini_step = 0
 							mini_sub_step = 0
