@@ -65,7 +65,7 @@ M_IR = -1
 R_IR = -1
 IR = [L_IR, M_IR, R_IR] # IR list
 recent_IR = [] # log of last few IR values
-
+avg_IR = -1
 
 ### ultrasonic variables
 # x_dist = -1 # distance x sensor detects from wall
@@ -197,9 +197,18 @@ if __name__ == '__main__':
 			rcvd_feedAction = int(line[8])
 			rcvd_shootAction = int(line[9])
 
+			recent_IR = recent_IR + [IR]
+			if len(recent_IR) > 40:
+				recent_IR.pop(0)
+			avg_IR = np.average(recent_IR)
+
+
 			# print values from 
 			print('ultrasonics: ' + str(round(left)) + ',' + str(round(right)) +',' + str(round(front)) + ',' + str(round(back)))
+			print('cos: ' + str(cos))
+			print('avg_cos: ' + str(np.average(avg_cos)))
 			print('IR: ' + str(IR))
+			print('avg_IR: ' + str(avg_IR))
 			print('limit switches: ' + str(f_prime_switch) + ',' + str(f_drop_switch) + ',' + str(shoot_switch))
 			print('recieved: dr ' + str(rcvd_driveAction) + ', fe ' + str(rcvd_feedAction) + ', sh ' + str(rcvd_shootAction))
 			# time.sleep(0.5)
@@ -411,12 +420,13 @@ if __name__ == '__main__':
 					l1 = np.average(avg_left) # take average of vals
 				print("Middle")
 				
-				curr_IR = [IR]
-				recent_IR = recent_IR + curr_IR
-				if len(recent_IR) >= 10:
-					recent_IR.pop(0) # remove first IR
+				## ocmmented out bc i included i in try statement
+				# curr_IR = [IR]
+				# recent_IR = recent_IR + curr_IR
+				# if len(recent_IR) >= 10:
+				# 	recent_IR.pop(0) # remove first IR
 					
-				if np.average(recent_IR) < 0.5:
+				if avg_IR < 0.5:
 					print("IR detected")
 					# prime, shoot
 					driveAction = 0
@@ -443,28 +453,30 @@ if __name__ == '__main__':
 					if ((IR == 0)  or (np.average(avg_cos) > 1.04)):
 						print('has turned 30-60 deg')
 						driveAction = 0
-						mini_step = 2
+						MODE = -1
+						# mini_step = 2
 				elif mini_step == 2:
 					print("detecting IR")
-					curr_IR = [IR]
-					recent_IR = recent_IR + curr_IR
-					if len(recent_IR) >= 30:
-						recent_IR.pop(0) # remove first IR
-						# print(len(recent_IR))
+					# commented out bc i included it in try statement
+					# curr_IR = [IR]
+					# recent_IR = recent_IR + curr_IR
+					# if len(recent_IR) >= 30:
+					# 	recent_IR.pop(0) # remove first IR
+					# 	# print(len(recent_IR))
 						
-					if np.average(recent_IR) < 0.6:
+					if avg_IR < 0.6:
 						print("IR detected")
 						# prime, shoot
 						driveAction = 0
 					else:
 						# print('else')
-						if len(recent_IR) >= 29:
-							print('prep step 2')
-							step = 2 # NO IR, SEARCH MIDDLE AGAIN
-							mini_step = 0
-							avg_cos = []
-							cos = -1
-							# MODE = -1
+						# if len(recent_IR) >= 29:
+						print('prep step 2')
+						step = 2 # NO IR, SEARCH MIDDLE AGAIN
+						mini_step = 0
+						avg_cos = []
+						cos = -1
+						# MODE = -1
 
 			elif step == 2: # MIDDLE 2
 				print('middle 2')
@@ -479,11 +491,11 @@ if __name__ == '__main__':
 					print('cos: ' + str(cos))
 					if len(avg_cos) >= 5:
 						avg_cos.pop(0)
-					if ((abs(np.average(avg_cos) < 0.56)) and (abs(np.average(avg_cos) > 0.56))): 
+					if ((abs(np.average(avg_cos) < 0.56))): 
 						print('has returned to front')
 						driveAction = 0
 						# mini_step = 2
-						MODE = -2
+						MODE = -1
 				elif mini_step == 2:
 					## re-calibrate avg right and left when "square"
 					avg_right = avg_right + [right] # get average of right sensor
@@ -492,23 +504,24 @@ if __name__ == '__main__':
 						r1 = np.average(avg_right) # take average of vals
 						l1 = np.average(avg_left) # take average of vals
 					print("detecting IR")
-					curr_IR = [IR]
-					recent_IR = recent_IR + curr_IR
-					if len(recent_IR) >= 5:
-						recent_IR.pop(0) # remove first IR
+					# commented out bc incl in try statment
+					# curr_IR = [IR]
+					# recent_IR = recent_IR + curr_IR
+					# if len(recent_IR) >= 5:
+					# 	recent_IR.pop(0) # remove first IR
 						
-					if np.average(recent_IR) < 0.5:
+					if avg_IR < 0.5:
 						print("IR detected")
 						# prime, shoot
 						driveAction = 0
 						# MODE = -2
 					else:
-						if len(recent_IR) > 20:
-							step = 3 # NO IR, SEARCH MIDDLE, RESTART LOOP
-							mini_step = 0
-							mini_sub_step = 0
-							avg_cos = []
-							cos = -1
+						# if len(recent_IR) > 20:
+						step = 3 # NO IR, SEARCH MIDDLE, RESTART LOOP
+						mini_step = 0
+						mini_sub_step = 0
+						avg_cos = []
+						cos = -1
 
 			elif step == 3: # LEFT
 				print("left")
@@ -532,12 +545,13 @@ if __name__ == '__main__':
 
 				elif mini_step == 2:
 					print("detecting IR")
-					curr_IR = [IR]
-					recent_IR = recent_IR + curr_IR
-					if len(recent_IR) >= 10:
-						recent_IR.pop(0) # remove first IR
+					# commented out bc incl in try statment
+					# curr_IR = [IR]
+					# recent_IR = recent_IR + curr_IR
+					# if len(recent_IR) >= 10:
+					# 	recent_IR.pop(0) # remove first IR
 						
-					if np.average(recent_IR) < 0.5:
+					if avg_IR < 0.5:
 						print("IR detected")
 						# prime, shoot
 						driveAction = 0
