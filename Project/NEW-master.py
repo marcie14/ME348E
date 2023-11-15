@@ -2,7 +2,7 @@
 
 '''
 status update:
-- ultrasonic cosine for mode1 (see modes -3. -4)
+- ultrasonic cosine for mode1 (see steps middle-> right works really well)
 
 - drives forward if placed forward, in middle of field (95% confidence...)
 - IR circuit is operational
@@ -141,11 +141,15 @@ mode2_shoot = 0
 shoot_drive_old = 0
 lastShoot = 0
 LS = 0
-mode1_DIR = 0 # -1 = left, 0 = front, 1 = right
 avg_right = []
+avg_left = []
 r1 = -1
+l1 = -1
 avg_cos = []
 cos = -1
+step = 0
+mini_step = 0
+mini_sub_step = 0
 
 '''############### MAIN FUNCTION ###############'''
 
@@ -212,7 +216,8 @@ if __name__ == '__main__':
 
 		print('MODE = ' + str(MODE)) # debug for below
 		print('step = ' + str(step) + '\n\n') # debug for below
-
+		print('mini_step = ' + str(mini_step))
+		print('mini_sub_step = ' + str(mini_sub_step))
 
 
 		# if MODE == -3: # TEST COSINE FUNCTION FOR MODE 1
@@ -398,32 +403,188 @@ if __name__ == '__main__':
   
     #### below is commented out because the IR is not integrated on robot yet
 		elif MODE == 1: # scan IR, pivot towards "on"
-			curr_IR = [IR]
-			if len(recent_IR) >= 10:
-				print('20')
-				# remove first IR
+			if step == 0: # MIDDLE
+				avg_right = avg_right + [right] # get average of right sensor
+				avg_left = avg_left + [left]
+				if len(avg_right) >= 20:
+					r1 = np.average(avg_right) # take average of vals
+					l1 = np.average(avg_left) # take average of vals
+				print("Middle")
 				
-				recent_IR.pop(0)
+				curr_IR = [IR]
 				recent_IR = recent_IR + curr_IR
-			else: 
-				print('too short')
-				recent_IR = recent_IR + curr_IR
+				if len(recent_IR) >= 10:
+					recent_IR.pop(0) # remove first IR
+					
+				if np.average(recent_IR) < 0.5:
+					print("IR detected")
+					# prime, shoot
+					driveAction = 0
+				else:
+					if len(avg_right) > 20:
+						step = 1 # NO IR, SEARCH RIGHT
+						mini_step = 0
+						mini_sub_step = 0
+						avg_cos = []
+						cos = -1
+			
+			elif step == 1: # RIGHT
+				if mini_step == 0: # initiate turn right
+					driveAction = 2 #turn right
+					mini_step = 1
+				elif mini_step == 1:
+					print('turning right')
+					cos = [math.cos(r1 / right)]
+					avg_cos = avg_cos + cos # get degrees has turned
+					print('r1: ' + str(r1))
+					print('cos: ' + str(cos))
+					if len(avg_cos) >= 5:
+						avg_cos.pop(0)
+					if (IR == 0) or (np.average(avg_cos) > 1.04):
+						print('has turned 30-60 deg')
+						driveAction = 0
+						mini_step = 2
+				elif mini_step == 2:
+					print("detecting IR")
+					curr_IR = [IR]
+					recent_IR = recent_IR + curr_IR
+					if len(recent_IR) >= 20:
+						recent_IR.pop(0) # remove first IR
+						
+					if np.average(recent_IR) < 0.5:
+						print("IR detected")
+						# prime, shoot
+						driveAction = 0
+					else:
+						if len(avg_cos) > 20:
+							step = 2 # NO IR, SEARCH MIDDLE AGAIN
+							mini_step = 0
+							avg_cos = []
+							cos = -1
+							# MODE = -1
 
-			if np.average(recent_IR) < 0.5:
-				print("IR detected")
-				driveAction = 0
-				MODE = -2
-				if mode2_DIR == 0:
-					mode2_DIR = 1
-				# if 
+			elif step == 2: # MIDDLE 2
+				print('middle 2')
+				if mini_step == 0: # initiate turn left
+					driveAction = 1 #turn left
+					mini_step = 1
+				elif mini_step == 1:
+					print('turning left')
+					cos = [math.cos(l1 / left)]
+					avg_cos = avg_cos + cos # get degrees has turned
+					print('l1: ' + str(l1))
+					print('cos: ' + str(cos))
+					if len(avg_cos) >= 5:
+						avg_cos.pop(0)
+					if (abs(np.average(avg_cos) < 0.1)): 
+						print('has turned 30-60 deg')
+						driveAction = 0
+						mini_step = 2
+				elif mini_step == 2:
+					## re-calibrate avg right and left when "square"
+					avg_right = avg_right + [right] # get average of right sensor
+					avg_left = avg_left + [left]
+					if len(avg_right) >= 20:
+						r1 = np.average(avg_right) # take average of vals
+						l1 = np.average(avg_left) # take average of vals
+					print("detecting IR")
+					curr_IR = [IR]
+					recent_IR = recent_IR + curr_IR
+					if len(recent_IR) >= 10:
+						recent_IR.pop(0) # remove first IR
+						
+					if np.average(recent_IR) < 0.5:
+						print("IR detected")
+						# prime, shoot
+						driveAction = 0
+						# MODE = -2
+					else:
+						if len(avg_right) > 20:
+							step = 3 # NO IR, SEARCH MIDDLE, RESTART LOOP
+							mini_step = 0
+							mini_sub_step = 0
+							avg_cos = []
+							cos = -1
 
-				# MODE = -1
-				# MODE = 2
-			elif (mode2_DIR == 0):
-				print("not detected")
-				driveAction = 2
+			elif step == 3: # LEFT
+				print("left")
+				if mini_step == 0: # initiate turn left
+					driveAction = 1 #turn left
+					mini_step = 1
+				elif mini_step == 1:
+					print('turning left')
+					cos = [math.cos(l1 / left)]
+					avg_cos = avg_cos + cos # get degrees has turned
+					print('l1: ' + str(l1))
+					print('cos: ' + str(cos))
+					if len(avg_cos) >= 5:
+						avg_cos.pop(0)
+					if (np.average(avg_cos) > 0.70) and (np.average(avg_cos) < 1.04):
+						print('has turned 30-60 deg')
+						driveAction = 0
+						mini_step = 2
+						avg_cos = []
+						cos = -1
+
+				elif mini_step == 2:
+					print("detecting IR")
+					curr_IR = [IR]
+					recent_IR = recent_IR + curr_IR
+					if len(recent_IR) >= 10:
+						recent_IR.pop(0) # remove first IR
+						
+					if np.average(recent_IR) < 0.5:
+						print("IR detected")
+						# prime, shoot
+						driveAction = 0
+					else:
+						if mini_sub_step == 0: # initiate turn right
+							driveAction = 1 #turn right
+							mini_sub_step = 1
+						elif mini_sub_step == 1:
+							print('turning right')
+							cos = [math.cos(l1 / left)]
+							avg_cos = avg_cos + cos # get degrees has turned
+							print('l1: ' + str(l1))
+							print('cos: ' + str(cos))
+							if len(avg_cos) >= 5:
+								avg_cos.pop(0)
+							if (abs(np.average(avg_cos) < 0.1)): 
+								print('has turned 30-60 deg')
+								if len(avg_cos) > 20:
+									step = 0 # NO IR, SEARCH MIDDLE, RESTART LOOP
+									mini_step = 0
+									mini_sub_step = 0
+									avg_cos = []
+									cos = -1
+			
+			
+			# curr_IR = [IR]
+			# if len(recent_IR) >= 10:
+			# 	print('20')
+			# 	# remove first IR
 				
-				# MODE = -2 # DEBUG
+			# 	recent_IR.pop(0)
+			# 	recent_IR = recent_IR + curr_IR
+			# else: 
+			# 	print('too short')
+			# 	recent_IR = recent_IR + curr_IR
+
+			# if np.average(recent_IR) < 0.5:
+			# 	print("IR detected")
+			# 	driveAction = 0
+			# 	MODE = -2
+			# 	if mode2_DIR == 0:
+			# 		mode2_DIR = 1
+			# 	# if 
+
+			# 	# MODE = -1
+			# 	# MODE = 2
+			# elif (mode2_DIR == 0):
+			# 	print("not detected")
+			# 	driveAction = 2
+				
+			# 	# MODE = -2 # DEBUG
 			
 
 
