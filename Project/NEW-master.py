@@ -2,6 +2,8 @@
 
 '''
 status update:
+- ultrasonic cosine for mode1 (see modes -3. -4)
+
 - drives forward if placed forward, in middle of field (95% confidence...)
 - IR circuit is operational
 - some skeleton code for rando orientation, not working well...
@@ -16,6 +18,7 @@ To do:
 import serial       # for communicating with arduino
 import time         # for non-blocking code
 import numpy as np  # for calcs
+import math # for calcs
 from sendStringScript import sendString # for communicating with arduino
 import RPi.GPIO as GPIO # for IR sensor # commented out for debug on MAC
 import random # for randomizing actions
@@ -25,7 +28,7 @@ keyboard = Controller() # for debug
 
 '''##### initialize setup variables  #####'''
 ### serial communications
-port = '/dev/ttyACM0' # RPi port for communicating to arduino board
+port = '/dev/ttyACM1' # RPi port for communicating to arduino board
 # port = '/dev/cu.usbmodem142101' # brycen mac port
 # port = '/dev/cu.usbmodem21101' # marcie mac port
 
@@ -61,6 +64,7 @@ L_IR = -1
 M_IR = -1
 R_IR = -1
 IR = [L_IR, M_IR, R_IR] # IR list
+recent_IR = [] # log of last few IR values
 
 
 ### ultrasonic variables
@@ -137,6 +141,11 @@ mode2_shoot = 0
 shoot_drive_old = 0
 lastShoot = 0
 LS = 0
+mode1_DIR = 0 # -1 = left, 0 = front, 1 = right
+avg_right = []
+r1 = -1
+avg_cos = []
+cos = -1
 
 '''############### MAIN FUNCTION ###############'''
 
@@ -169,10 +178,10 @@ if __name__ == '__main__':
 			# print(line)
 			# x_dist = float(line[0]) # distance x sensor detects from wall
 			# y_dist = float(line[1]) # distance y sensor detects from wall
-			L_IR = GPIO.input(L_IR_pin) # active low, 0 = detected ## uncomment for MA
-			M_IR = GPIO.input(M_IR_pin) # active low, 0 = detected
-			R_IR = GPIO.input(R_IR_pin) # active low, 0 = detected
-			IR = [L_IR, M_IR, R_IR] # IR list
+			# L_IR = GPIO.input(L_IR_pin) # active low, 0 = detected ## uncomment for MA
+			IR = GPIO.input(M_IR_pin) # active low, 0 = detected
+			# R_IR = GPIO.input(R_IR_pin) # active low, 0 = detected
+			# IR = [L_IR, M_IR, R_IR] # IR list
 			left = float(line[0])
 			right = float(line[1])
 			front = float(line[2])
@@ -185,8 +194,8 @@ if __name__ == '__main__':
 			rcvd_shootAction = int(line[9])
 
 			# print values from 
-			print('ultrasonics: ' + str(left) + ',' + str(right) +',' + str(front) + ',' + str(back))
-			print('IR: ' + str(L_IR) + ',' + str(M_IR) +',' + str(R_IR))
+			print('ultrasonics: ' + str(round(left)) + ',' + str(round(right)) +',' + str(round(front)) + ',' + str(round(back)))
+			print('IR: ' + str(IR))
 			print('limit switches: ' + str(f_prime_switch) + ',' + str(f_drop_switch) + ',' + str(shoot_switch))
 			print('recieved: dr ' + str(rcvd_driveAction) + ', fe ' + str(rcvd_feedAction) + ', sh ' + str(rcvd_shootAction))
 			# time.sleep(0.5)
@@ -201,15 +210,64 @@ if __name__ == '__main__':
         
 
 
-		# print('MODE = ' + str(MODE)) # debug for below
-		# print('step = ' + str(step) + '\n\n') # debug for below
+		print('MODE = ' + str(MODE)) # debug for below
+		print('step = ' + str(step) + '\n\n') # debug for below
 
-       
+
+
+		# if MODE == -3: # TEST COSINE FUNCTION FOR MODE 1
+		# 	driveAction = 0
+		# 	avg_right = avg_right + [right] # get average of right sensor
+		# 	if len(avg_right) >= 20:
+		# 		driveAction = 2 #turn right
+		# 		r1 = np.average(avg_right) # take average of vals
+				
+		# 		MODE = -4
+		# elif MODE == -4:
+		# 	cos = [math.cos(r1 / right)]
+		# 	avg_cos = avg_cos + cos # get degrees has turned
+		# 	print('r1: ' + str(r1))
+		# 	print('cos: ' + str(cos))
+		# 	if len(avg_cos) >= 5:
+		# 		avg_cos.pop(0)
+		# 	if (np.average(avg_cos) > 0.70) and (np.average(avg_cos) < 1.04):
+		# 		print('has turned 30-60 deg')
+		# 		driveAction = 0
+		# 		MODE = -2
+		if MODE == -3: # TEST COSINE FUNCTION FOR MODE 1
+			driveAction = 0
+			avg_right = avg_right + [left] # get average of right sensor
+			if len(avg_right) >= 20:
+				driveAction = 1 #turn right
+				r1 = np.average(avg_right) # take average of vals
+				
+				MODE = -4
+		elif MODE == -4:
+			cos = [math.cos(r1 / left)]
+			avg_cos = avg_cos + cos # get degrees has turned
+			print('r1: ' + str(r1))
+			print('cos: ' + str(cos))
+			if len(avg_cos) >= 5:
+				avg_cos.pop(0)
+			if (np.average(avg_cos) > 0.70) and (np.average(avg_cos) < 1.04):
+				print('has turned 30-60 deg')
+				driveAction = 0
+				MODE = -2
+
+
+
+
+
+		elif MODE == -2: # do nothing, view print statements from pi
+			driveAction = 0
+			feedAction = 0
+			shootAction = 0
+			print('\n')
       
-		if MODE == -1: # send serial before ending program
+		elif MODE == -1: # send serial before ending program
 			break
 
-		if MODE == 0: # orient bot towards front
+		elif MODE == 0: # orient bot towards front
 			#driveAction = 4
 			shootAction = 3
 			int_diffX = abs(left-right)
@@ -256,11 +314,12 @@ if __name__ == '__main__':
 				print('step 1')
 				curr_diffX = abs(left-right)
 				driveAction = 3
-				if(abs(curr_diffX) > ultra_x_tol):
+				#print(front-sendY) < 5
+				if(abs(curr_diffX) > left):#ultra_x_tol):
 					step = 2
 					print("1 end: ",curr_diffX)
 					lunch = 0
-				elif ((front - sendY) < 5): # changed from ultra_y_tol
+				elif ((front-sendY) < 5): # changed from ultra_y_tol
 					driveAction = 0 # stop moving
 					# MODE = 1 # uncomment for final
 					#step = 0
@@ -338,43 +397,73 @@ if __name__ == '__main__':
   
     #### below is commented out because the IR is not integrated on robot yet
 		elif MODE == 1: # scan IR, pivot towards "on"
-			driveAction = 1
-	    # check for LMR IR sensors
-			if IR == 0: # if IR sensor detects something
-				# move forward
+			curr_IR = [IR]
+			if len(recent_IR) >= 10:
+				print('20')
+				# remove first IR
+				
+				recent_IR.pop(0)
+				recent_IR = recent_IR + curr_IR
+			else: 
+				print('too short')
+				recent_IR = recent_IR + curr_IR
+
+			if np.average(recent_IR) < 0.5:
+				print("IR detected")
 				driveAction = 0
+				MODE = -2
+				if mode2_DIR == 0:
+					mode2_DIR = 1
+				# if 
+
+				# MODE = -1
+				# MODE = 2
+			elif (mode2_DIR == 0):
+				print("not detected")
+				driveAction = 2
 				
-				#  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
-			if IR == [1,0,0] or IR == [1,1,0]:
-				print('ir detected on left')
-				sendX = leftGoal[0]
-				sendY = leftGoal[1]
-			elif IR == [0,1,0]:
-				print('ir detected center')
-				sendX = midGoal[0]
-				sendY = midGoal[1]
-				
-			elif IR == [0,1,1] or IR == [0,0,1]:
-				print('ir detected on right')
-				sendX = rightGoal[0]
-				sendY = rightGoal[1]
-					
-	        	### execute driveAction
-				if (front < sendY):
-					driveAction = -1 # stop moving
-				elif (sendX - ultra_x_tol <= left <= sendX + ultra_x_tol):
-					driveAction = 0 # forward
-				
-				elif (left < sendX - ultra_x_tol):# center 75, left 20, right 130
-					driveAction = 1 # left
-				
-				elif (left > sendX + ultra_x_tol): # center 90, left 32, right 140
-					driveAction = 2 # right
+				# MODE = -2 # DEBUG
 			
-				else:
-					driveAction = 0 # forward
-			else:
-				print('no IR')
+
+
+		########################## BELOW IS OLD
+		# 	driveAction = 1
+	    # # check for LMR IR sensors
+		# 	if IR == 0: # if IR sensor detects something
+		# 		# move forward
+		# 		driveAction = 0
+				
+		# 		#  0 = forward, 1 = left, 2 = right, 3 = backward, else = stop moving
+		# 	if IR == [1,0,0] or IR == [1,1,0]:
+		# 		print('ir detected on left')
+		# 		sendX = leftGoal[0]
+		# 		sendY = leftGoal[1]
+		# 	elif IR == [0,1,0]:
+		# 		print('ir detected center')
+		# 		sendX = midGoal[0]
+		# 		sendY = midGoal[1]
+				
+		# 	elif IR == [0,1,1] or IR == [0,0,1]:
+		# 		print('ir detected on right')
+		# 		sendX = rightGoal[0]
+		# 		sendY = rightGoal[1]
+					
+	    #     	### execute driveAction
+		# 		if (front < sendY):
+		# 			driveAction = -1 # stop moving
+		# 		elif (sendX - ultra_x_tol <= left <= sendX + ultra_x_tol):
+		# 			driveAction = 0 # forward
+				
+		# 		elif (left < sendX - ultra_x_tol):# center 75, left 20, right 130
+		# 			driveAction = 1 # left
+				
+		# 		elif (left > sendX + ultra_x_tol): # center 90, left 32, right 140
+		# 			driveAction = 2 # right
+			
+		# 		else:
+		# 			driveAction = 0 # forward
+		# 	else:
+		# 		print('no IR')
 
 		elif MODE == 2: # VERIFY IR in front, feeder prime/drop, move forward, shoot, move back, go back to mode 1
 			print("shoot")
