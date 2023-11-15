@@ -1,5 +1,6 @@
 #include <HCSR04.h>
 #include <ezButton.h>
+#include <Encoder.h>
 boolean newData = true;
 
 // data parsing
@@ -36,6 +37,15 @@ int motor2pin1 = 10; // right
 int motor2pin2 = 11; // right
 int L_ENA = 12;
 int R_ENB = 13;
+
+int leftEncA = 46;
+int leftEncB = 44;
+int rightEncA = 42;
+int rightEncB = 40;
+
+Encoder lW(leftEncA, leftEncB);
+Encoder rW(rightEncA, rightEncB);
+long rPos,lPos;
 
 // feeder
 int feederpin1 = 2; // PWM
@@ -109,6 +119,10 @@ void loop() {
   front = front_sensor.measureDistanceCm();
   back = back_sensor.measureDistanceCm();
 
+  lPos = lW.read();
+  rPos = rW.read();
+  
+  
   recvWithStartEndMarkers();
 
   if (newData == true){  
@@ -193,6 +207,10 @@ void sendRecievedData(){
   Serial.print(front);
   Serial.print(',');
   Serial.print(back);
+  Serial.print(',');
+  Serial.print(lPos);
+  Serial.print(',');
+  Serial.print(rPos);
   Serial.print(',');
 //  Serial.print(" Feeder: "); // DEBUG
   Serial.print(f_prime_switch.getState());

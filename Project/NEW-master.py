@@ -94,6 +94,11 @@ midGoal = (83, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
 rightGoal = (135, shoot_y_dist) # cm - NOT ADJUSTED FOR CHASSIS
 
 
+
+### motor encoders
+lPos = -1
+rPos = -1
+
 ### Limit Switches
 f_prime_switch = -1
 f_drop_switch = -1
@@ -190,12 +195,14 @@ if __name__ == '__main__':
 			right = float(line[1])
 			front = float(line[2])
 			back = float(line[3])
-			f_prime_switch = int(line[4])
-			f_drop_switch = int(line[5])
-			shoot_switch = int(line[6])
-			rcvd_driveAction = int(line[7])
-			rcvd_feedAction = int(line[8])
-			rcvd_shootAction = int(line[9])
+			lPos = float(line[4])
+			rPos = float(line[5])
+			f_prime_switch = int(line[6])
+			f_drop_switch = int(line[7])
+			shoot_switch = int(line[8])
+			rcvd_driveAction = int(line[9])
+			rcvd_feedAction = int(line[10])
+			rcvd_shootAction = int(line[11])
 
 			recent_IR = recent_IR + [IR]
 			if len(recent_IR) > 40:
@@ -205,6 +212,7 @@ if __name__ == '__main__':
 
 			# print values from 
 			print('ultrasonics: ' + str(round(left)) + ',' + str(round(right)) +',' + str(round(front)) + ',' + str(round(back)))
+			print('Enc: ' + str(lPos) + ', ' + str(rPos))
 			print('cos: ' + str(cos))
 			print('avg_cos: ' + str(np.average(avg_cos)))
 			print('IR: ' + str(IR))
@@ -409,10 +417,10 @@ if __name__ == '__main__':
 					# MODE = -1 # DEBUG end program
 					## debug - remove for final version
 		
-  
-    #### below is commented out because the IR is not integrated on robot yet
+###############  BELOW IS WHERE COS MATH IS 
 		elif MODE == 1: # scan IR, pivot towards "on"
 			if step == 0: # MIDDLE
+				# INITIATE LEFT AND RIGHT VALUES (COSINE REFERENCE READINGS)
 				avg_right = avg_right + [right] # get average of right sensor
 				avg_left = avg_left + [left]
 				if len(avg_right) >= 20:
@@ -444,17 +452,17 @@ if __name__ == '__main__':
 					mini_step = 1
 				elif mini_step == 1:
 					print('turning right')
-					cos = [math.cos(r1 / right)]
+					cos = [math .cos(r1 / right)]
 					avg_cos = avg_cos + cos # get degrees has turned
 					print('r1: ' + str(r1))
 					print('cos: ' + str(cos))
 					if len(avg_cos) >= 5:
 						avg_cos.pop(0)
-					if ((IR == 0)  or (np.average(avg_cos) > 1.04)):
+					if ((np.average(avg_cos) > .65)):
 						print('has turned 30-60 deg')
 						driveAction = 0
 						MODE = -1
-						# mini_step = 2
+						mini_step = 2
 				elif mini_step == 2:
 					print("detecting IR")
 					# commented out bc i included it in try statement
@@ -495,7 +503,7 @@ if __name__ == '__main__':
 						print('has returned to front')
 						driveAction = 0
 						# mini_step = 2
-						MODE = -1
+						# MODE = -1
 				elif mini_step == 2:
 					## re-calibrate avg right and left when "square"
 					avg_right = avg_right + [right] # get average of right sensor
@@ -576,7 +584,7 @@ if __name__ == '__main__':
 									avg_cos = []
 									cos = -1
 			
-			
+########################################### END COS MATH			
 			# curr_IR = [IR]
 			# if len(recent_IR) >= 10:
 			# 	print('20')
