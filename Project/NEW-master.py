@@ -153,6 +153,7 @@ cos = -1
 step = 0
 mini_step = 0
 mini_sub_step = 0
+shoot_counter = 0
 
 '''############### MAIN FUNCTION ###############'''
 
@@ -203,11 +204,15 @@ if __name__ == '__main__':
 			rcvd_shootAction = int(line[11])
 
 			recent_IR = recent_IR + [IR]
-			if len(recent_IR) > 40:
+			if len(recent_IR) > 5:
 				recent_IR.pop(0)
 			avg_IR = np.average(recent_IR)
-			if avg_IR < 0.5:
-				MODE = 2
+			# if avg_IR < 0.5:
+			# 	MODE = 2
+				
+			# 	step = 0
+			# 	mini_step = 0
+			# 	mini_step = 0
 
 			# print values from 
 			print('ultrasonics: ' + str(round(left)) + ',' + str(round(right)) +',' + str(round(front)) + ',' + str(round(back)))
@@ -225,6 +230,7 @@ if __name__ == '__main__':
 			print("Received invalid byte sequence. Skipping...")
 		except:
 			print("packet dropped")
+			MODE = -1
 			GPIO.cleanup()
 
         
@@ -346,7 +352,7 @@ if __name__ == '__main__':
 					# MODE = 1 # uncomment for final
 					#step = 0
 					print('done - step 1')
-					MODE = -1 # DEBUG end program
+					# MODE = -1 # DEBUG end program
 					
 
 			if step == 2: # second step of MODE 0 - begin rotating to find squared position
@@ -413,8 +419,7 @@ if __name__ == '__main__':
 					# MODE = 1 # uncomment for final
 					step = 1
 					print('done - step 5') ## debug - remove for final version
-					# MODE = -1 # DEBUG end program
-					## debug - remove for final version
+			
 		
 ###############  BELOW IS WHERE COS MATH IS 
 		elif MODE == 1: # scan IR, pivot towards "on"
@@ -426,19 +431,21 @@ if __name__ == '__main__':
 					r1 = np.average(avg_right) # take average of vals
 					l1 = np.average(avg_left) # take average of vals
 				print("Middle")
-				
-				## ocmmented out bc i included i in try statement
-				# curr_IR = [IR]
-				# recent_IR = recent_IR + curr_IR
-				# if len(recent_IR) >= 10:
-				# 	recent_IR.pop(0) # remove first IR
+
+				feedAction = 0
+				shootAction = 0
+
 					
 				if avg_IR < 0.5:
 					print("IR detected")
 					# prime, shoot
 					driveAction = 0
 					MODE = 2
+					step = 0
+					mini_step = 0
+					mini_step = 0
 				else:
+				
 					if len(avg_right) > 20:
 						step = 1 # NO IR, SEARCH RIGHT
 						mini_step = 0
@@ -452,33 +459,30 @@ if __name__ == '__main__':
 					mini_step = 1
 				elif mini_step == 1:
 					print('turning right')
-					cos = [math .cos(r1 / right)]
-					avg_cos = avg_cos + cos # get degrees has turned
-					print('r1: ' + str(r1))
-					print('cos: ' + str(cos))
-					if len(avg_cos) >= 5:
-						avg_cos.pop(0)
-					if ((np.average(avg_cos) > .65)):
-						print('has turned 30-60 deg')
+					if front > 65:
 						driveAction = 0
-						MODE = 2
 						mini_step = 2
+					# cos = [math .cos(r1 / right)]
+					# avg_cos = avg_cos + cos # get degrees has turned
+					# print('r1: ' + str(r1))
+					# print('cos: ' + str(cos))
+					# if len(avg_cos) >= 5:
+					# 	avg_cos.pop(0)
+					# if (avg_IR < 0.99): # (np.average(avg_cos) > 0.9) or 
+					# 	print('has turned 30-60 deg')
+					# 	driveAction = 0
+					# 	# MODE = 2
+					# 	mini_step = 2
 				elif mini_step == 2:
 					print("detecting IR")
-					# commented out bc i included it in try statement
-					# curr_IR = [IR]
-					# recent_IR = recent_IR + curr_IR
-					# if len(recent_IR) >= 30:
-					# 	recent_IR.pop(0) # remove first IR
-					# 	# print(len(recent_IR))
-						
-					if avg_IR < 0.6:
+			
+					if avg_IR < 0.95:
 						print("IR detected")
 						driveAction = 0
 						MODE = 2
 						step = 0
 						mini_step = 0
-						mini_substep = 0
+						mini_sub_step = 0
 					else:
 						# print('else')
 						# if len(recent_IR) >= 29:
@@ -495,97 +499,116 @@ if __name__ == '__main__':
 					driveAction = 1 #turn left
 					mini_step = 1
 				elif mini_step == 1:
-					print('turning left')
-					cos = [math.cos(r1 / right)]
-					avg_cos = avg_cos + cos # get degrees has turned
-					print('r1: ' + str(r1))
-					print('cos: ' + str(cos))
-					if len(avg_cos) >= 5:
-						avg_cos.pop(0)
-					if ((abs(np.average(avg_cos) < 0.56))): 
-						print('has returned to front')
+					print('turning mid')
+					if (front < 10) or ( (avg_IR < 0.8)): #17 < abs(left - right) < 23 or
 						driveAction = 0
-						# mini_step = 2
-						# MODE = -1
-# 				elif mini_step == 2:
-# 					## re-calibrate avg right and left when "square"
-# 					avg_right = avg_right + [right] # get average of right sensor
-# 					avg_left = avg_left + [left]
-# 					if len(avg_right) >= 20:
-# 						r1 = np.average(avg_right) # take average of vals
-# 						l1 = np.average(avg_left) # take average of vals
-# 					print("detecting IR")
-# 					# commented out bc incl in try statment
-# 					# curr_IR = [IR]
-# 					# recent_IR = recent_IR + curr_IR
-# 					# if len(recent_IR) >= 5:
-# 					# 	recent_IR.pop(0) # remove first IR
+						mini_step = 2
+					# cos = [math.cos(r1 / right)]
+					# avg_cos = avg_cos + cos # get degrees has turned
+					# print('r1: ' + str(r1))
+					# print('cos: ' + str(cos))
+					# if len(avg_cos) >= 5:
+					# 	avg_cos.pop(0)
+					# if ((avg_IR < 0.6)): 
+					# 	step = 1
+					# 	mini_step = 2
+					# elif ((abs(np.average(avg_cos) < 0.6))):
+					# 	print('has returned to front')
+					# 	driveAction = 0
+					# 	mini_step = 2
+						# MODE = -2
+				elif mini_step == 2:
+					## re-calibrate avg right and left when "square"
+					avg_right = avg_right + [right] # get average of right sensor
+					avg_left = avg_left + [left]
+					if len(avg_right) >= 20:
+						r1 = np.average(avg_right) # take average of vals
+						l1 = np.average(avg_left) # take average of vals
+					print("detecting IR")
+					# commented out bc incl in try statment
+					# curr_IR = [IR]
+					# recent_IR = recent_IR + curr_IR
+					# if len(recent_IR) >= 5:
+					# 	recent_IR.pop(0) # remove first IR
 						
-# 					if avg_IR < 0.5:
-# 						print("IR detected")
-# 						# prime, shoot
-# 						driveAction = 0
-# 						# MODE = -2
-# 					else:
-# 						# if len(recent_IR) > 20:
-# 						step = 3 # NO IR, SEARCH MIDDLE, RESTART LOOP
-# 						mini_step = 0
-# 						mini_sub_step = 0
-# 						avg_cos = []
-# 						cos = -1
-
-# 			elif step == 3: # LEFT
-# 				print("left")
-# 				if mini_step == 0: # initiate turn left
-# 					driveAction = 1 #turn left
-# 					mini_step = 1
-# 				elif mini_step == 1:
-# 					print('turning left')
-# 					cos = [math.cos(l1 / left)]
-# 					avg_cos = avg_cos + cos # get degrees has turned
-# 					print('l1: ' + str(l1))
-# 					print('cos: ' + str(cos))
-# 					if len(avg_cos) >= 5:
-# 						avg_cos.pop(0)
-# 					if (np.average(avg_cos) > 0.70) and (np.average(avg_cos) < 1.04):
-# 						print('has turned 30-60 deg')
-# 						driveAction = 0
-# 						mini_step = 2
-# 						avg_cos = []
-# 						cos = -1
-
-# 				elif mini_step == 2:
-# 					print("detecting IR")
-# 					# commented out bc incl in try statment
-# 					# curr_IR = [IR]
-# 					# recent_IR = recent_IR + curr_IR
-# 					# if len(recent_IR) >= 10:
-# 					# 	recent_IR.pop(0) # remove first IR
+					if avg_IR < 0.8:
+						print("IR detected")
+						# prime, shoot
+						driveAction = 0
+						MODE = 2
 						
-# 					if avg_IR < 0.5:
-# 						print("IR detected")
-# 						# prime, shoot
-# 						driveAction = 0
-# 					else:
-# 						if mini_sub_step == 0: # initiate turn right
-# 							driveAction = 1 #turn right
-# 							mini_sub_step = 1
-# 						elif mini_sub_step == 1:
-# 							print('turning right')
-# 							cos = [math.cos(l1 / left)]
-# 							avg_cos = avg_cos + cos # get degrees has turned
-# 							print('l1: ' + str(l1))
-# 							print('cos: ' + str(cos))
-# 							if len(avg_cos) >= 5:
-# 								avg_cos.pop(0)
-# 							if (abs(np.average(avg_cos) < 0.1)): 
-# 								print('has turned 30-60 deg')
-# 								if len(avg_cos) > 20:
-# 									step = 0 # NO IR, SEARCH MIDDLE, RESTART LOOP
-# 									mini_step = 0
-# 									mini_sub_step = 0
-# 									avg_cos = []
-# 									cos = -1
+						step = 0
+						mini_step = 0
+						mini_step = 0
+					else:
+						# if len(recent_IR) > 20:
+						step = 3 # NO IR, SEARCH MIDDLE, RESTART LOOP
+						mini_step = 0
+						mini_sub_step = 0
+						avg_cos = []
+						cos = -1
+
+			elif step == 3: # LEFT
+				print("left")
+				if mini_step == 0: # initiate turn left
+					driveAction = 1 #turn left
+					mini_step = 1
+				elif mini_step == 1:
+					print('turning left')
+					if front > 65:
+						driveAction = 0
+						mini_step = 2
+					# cos = [math.cos(l1 / left)]
+					# avg_cos = avg_cos + cos # get degrees has turned
+					# print('l1: ' + str(l1))
+					# print('cos: ' + str(cos))
+					# if len(avg_cos) >= 5:
+					# 	avg_cos.pop(0)
+					# if (np.average(avg_cos) > 0.70) and (np.average(avg_cos) < 1.04):
+					# 	print('has turned 30-60 deg')
+					# 	driveAction = 0
+					# 	mini_step = 2
+					# 	avg_cos = []
+					# 	cos = -1
+
+				elif mini_step == 2:
+					print("detecting IR")
+					# commented out bc incl in try statment
+					# curr_IR = [IR]
+					# recent_IR = recent_IR + curr_IR
+					# if len(recent_IR) >= 10:
+					# 	recent_IR.pop(0) # remove first IR
+						
+					if avg_IR < 0.9:
+						print("IR detected")
+						# prime, shoot
+						driveAction = 0
+						MODE = 2
+						step = 0
+						mini_step = 0
+						mini_step = 0
+					else:
+						driveAction = 0
+						if mini_sub_step == 0: # initiate turn right
+							driveAction = 2 #turn right
+							MODE = -2
+							mini_sub_step = 1
+						elif mini_sub_step == 1:
+							print('turning mid')
+							# cos = [math.cos(l1 / left)]
+							# avg_cos = avg_cos + cos # get degrees has turned
+							# print('l1: ' + str(l1))
+							# print('cos: ' + str(cos))
+							# if len(avg_cos) >= 5:
+							# 	avg_cos.pop(0)
+							# if (abs(np.average(avg_cos) < .56)): 
+							# 	print('has turned 30-60 deg')
+							if front < 8:
+								step = 0 # NO IR, SEARCH MIDDLE, RESTART LOOP
+								mini_step = 0
+								mini_sub_step = 0
+								avg_cos = []
+								cos = -1
 			
 # ########################################### END COS MATH			
 
@@ -597,58 +620,72 @@ if __name__ == '__main__':
 				if feeder not primed, prime
 			'''
 			if avg_IR > 0.7:
+				shootAction = 0
+				feedAction = 0
 				MODE = 1
-				step = 0
-				mini_step = 0
-				mini_sub_step = 0
-			if step == 0: # if first time in function
-				if (((f_drop_switch == 0) and (f_prime_switch == 0)) or (f_drop_switch == 1)): # if feeder slide is in middle or drop switch pressed
-					feedAction = 1 # prime
-					MODE = 3
-				elif (f_prime_switch == 1): # if primed
-					# feedAction = 0 # pause while primed until time to drop puck
-					feedAction = 2 # drop
-					step = 1 # has primed
-					mini_step = 0
-					MODE = 3
-			elif step == 1: # if has primed
-				if ((f_drop_switch == 0) and (f_prime_switch == 0)): # if feeder slide is in middle
-					feedAction = 2 # drop
-				elif (f_drop_switch == 1): # if dropped
-					feedAction = 0 # stop moving feeder
-					if mini_step == 0: # if in first section of shoot cycle
-						# driveAction = 3 # move straight
-						# if ((now - shoot_drive_old) > 2): #if has been driving straight for 2 sec
-						driveAction = 0 # stop moving
-						mini_step = 1 # enter second mode of shoot cycle
+				# step = 0
+				# mini_step = 0
+				# mini_sub_step = 0
+			else:
+				# print('3')
+				f_drop_switch = 1
+				MODE = 3
+			# feedAction = 0
+			# if (f_prime_switch == 1)
+			# if step == 0: # if first time in function
+			# 	if (((f_drop_switch == 0) and (f_prime_switch == 0)) or (f_drop_switch == 1)): # if feeder slide is in middle or drop switch pressed
+			# 		feedAction = 1 # prime
+			# 		MODE = 3
+			# 	elif (f_prime_switch == 1): # if primed
+			# 		# feedAction = 0 # pause while primed until time to drop puck
+			# 		feedAction = 2 # drop
+			# 		step = 0 # has primed
+			# 		mini_step = 0
+			# 		MODE = 3
+			# elif step == 1: # if has primed
+			# 	if ((f_drop_switch == 0) and (f_prime_switch == 0)): # if feeder slide is in middle
+			# 		feedAction = 1 # drop
+			# 	elif (f_drop_switch == 1): # if dropped
+			# 		feedAction = 0 # stop moving feeder
+			# 		if mini_step == 0: # if in first section of shoot cycle
+			# 			# driveAction = 3 # move straight
+			# 			# if ((now - shoot_drive_old) > 2): #if has been driving straight for 2 sec
+			# 			driveAction = 0 # stop moving
+			# 			mini_step = 1 # enter second mode of shoot cycle
 
-					elif mini_step == 1: # if second mode of shoot cycle
-						if shoot_switch == 0: #  if shoot switch has not been pushed
-							shootAction = 1 # shoot
-							mini_step = 2 # update action of been shot
-						if shoot_switch == 1:
-							shootAction = 1
+			# 		elif mini_step == 1: # if second mode of shoot cycle
+			# 			if shoot_switch == 0: #  if shoot switch has not been pushed
+			# 				shootAction = 1 # shoot
+			# 				mini_step = 2 # update action of been shot
+			# 			if shoot_switch == 1:
+			# 				shootAction = 1
 
-					elif mini_step == 2: # if third mode of shoot cycle
-						if shoot_switch == 1: # if shoot switch has been pushed
-							shootAction = 0 # stop shooting
-							driveAction = 4 # move backwards
-						if ((now - shoot_drive_old) > 2): #if has been driving backwards for 2 sec
-							driveAction = 0 # stop moving
-							step = 0 # reset variables for MODE 2
-							mini_step = 0 # reset variables for MODE 2
+			# 		elif mini_step == 2: # if third mode of shoot cycle
+			# 			if shoot_switch == 1: # if shoot switch has been pushed
+			# 				shootAction = 0 # stop shooting
+			# 				driveAction = 4 # move backwards
+			# 			if ((now - shoot_drive_old) > 2): #if has been driving backwards for 2 sec
+			# 				driveAction = 0 # stop moving
+			# 				step = 0 # reset variables for MODE 2
+			# 				mini_step = 0 # reset variables for MODE 2
 		
 		elif MODE == 3: ## feed Mode
 			driveAction = 0
-			shootAction = 0
-			
+			if  feedAction == 0 and (f_drop_switch == 0 and f_prime_switch == 0):
+				f_drop_switch = 1
+			# shootAction = 0
+			# if (f_prime_switch == 0) or (f_drop_switch == 0):
+			# 	feedAction  = 1
+			if avg_IR > 0.9 and (f_drop_switch == 1 or f_prime_switch == 1):
+				feedAction = 0
+				MODE = 1
 			if f_prime_switch == 1: # if primed
-				feedAction = 0 # stop
+				feedAction = 2 # drop
 				MODE = 2 # return to mode 2
-				step = 1
+			
 				
 			elif f_drop_switch == 1: # if dropped
-				feedAction = 0 # stop
+				feedAction = 1 # drop
 				shootAction = 1
 				MODE = 4
 
@@ -656,14 +693,16 @@ if __name__ == '__main__':
 			driveAction = 0
 			feedAction = 0
 			if shoot_switch == 1:
-				
-				shootAction = 0
+				shoot_counter = shoot_counter + 1
+				if shoot_counter > 4:
+					shoot_counter = 0
+					shootAction = 0
 				# MODE = -1
 				# if now - lastShoot > 50:
 				# 	shootAction = 1
 				# 	LS = 1
-				feedAction = 1 # prime feeder
-				MODE = 3
+					feedAction = 1 # prime feeder
+					MODE = 3
 
 		
 

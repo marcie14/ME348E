@@ -423,8 +423,8 @@ void moveBackwards(){
 }
 
 void turnRight(){
-  analogWrite(L_ENA, 100); //ENA   pin
-  analogWrite(R_ENB, 100); //ENB pin
+  analogWrite(L_ENA, 125); //ENA   pin
+  analogWrite(R_ENB, 125); //ENB pin
 
 
   // left fwd
@@ -437,8 +437,8 @@ void turnRight(){
 }
 
 void turnLeft(){
-  analogWrite(L_ENA, 100); //ENA   pin
-  analogWrite(R_ENB, 100); //ENB pin
+  analogWrite(L_ENA, 125); //ENA   pin
+  analogWrite(R_ENB, 125); //ENB pin
 
   // left bkwd
   digitalWrite(motor1pin1, LOW);
